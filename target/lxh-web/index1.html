@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket</title>
+</head>
+<style type="text/css">
+    #div {
+        color: red;
+    }
+</style>
+<body>
+<h1>webSocket</h1>
+<div id="div">
+
+</div>
+<script type="text/javascript" src="./js/sockjs.js"></script>
+<script type="text/javascript">
+    var div = document.getElementById('div');
+    var prefix = "ws://127.0.0.1:8080/";
+    var websocketUrl = prefix + 'lxh-web/websocket';
+    var sockJSUrl = prefix + 'socketJs';
+    var socket = null;
+
+    if ('WebSocket' in window) {
+        socket = new WebSocket(websocketUrl);
+    }
+    else {
+        socket = new SockJS(sockJSUrl);
+    }
+
+    socket.onopen = function(event){
+        console.log(event);
+        socket.send('websocket client connect test');
+    }
+
+    socket.onclose = function(event){
+        console.log(event);
+    }
+
+    socket.onerror = function(event){
+        console.log(event);
+    }
+
+    socket.onmessage = function(event){
+        console.log(event)
+        div.innerHTML += ('接受到服务器消息：' + event.data);
+    }
+</script>
+</body>
+</html>

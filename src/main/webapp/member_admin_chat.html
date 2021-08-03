@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <title>客服咨询</title>
+    <link rel="stylesheet" type="text/css" href="/${res}/chat/css/chat.css"/>
+    <script src="/${res}/js/jquery.1.9.1.js"></script>
+    <script src="/${res}/chat/js/flexible.js"></script>
+</head>
+<body>
+
+
+<header class="header">
+    <a class="back" href="javascript:history.back()"></a>
+    <h5 class="tit">客服</h5>
+</header>
+<div id="message">
+
+</div>
+<div id="footer">
+    <img src="/${res}/chat/images/hua.png" alt=""/>
+    <input class="my-input" type="text"/>
+    <p class="send">发送</p>
+</div>
+<script>
+
+    //聊天
+    var ws;
+    var obj = {
+        user_id: '${user.id}',
+        message: '',
+        chat_type: "user_chat"
+    }
+    var target = "ws:${websocket_url!}/chat_websocket?msg=" + encodeURI(JSON.stringify(obj));
+
+
+    var canSend = false;
+    $(function () {
+
+        //处理浏览器兼容性
+        if ('WebSocket' in window) {
+            ws = new WebSocket(target);
+        } else if ('MozWebSocket' in window) {
+            ws = new MozWebSocket(target);
+        } else {
+            alert('WebSocket is not supported by this browser.');
+            return;
+        }
+
+        ws.onopen = function () {
+
+        };
+        ws.onmessage = function (event) {
+            var data = JSON.parse(event.data);
+            console.log(data)
+            $('#message').html("");
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].userId != '${user.id}') {
+                    reply("/${res}/chat/images/touxiangm.png", data[i].message);
+                } else {
+                    ask("/${res}/chat/images/touxiang.png", data[i].message);
+                }
+            }
+        };
+
+        ws.onclose = function (event) {
+            alert("连接断开,请重新刷新页面");
+            location.reload();
+        }
+        $('#footer').on('keyup', 'input', function () {
+            if ($(this).val().length > 0) {
+                $(this).next().css('background', '#114F8E').prop('disabled', true);
+                canSend = true;
+            } else {
+                $(this).next().css('background', '#ddd').prop('disabled', false);
+                canSend = false;
+            }
+        })
+        $('#footer .send').click(send)
+        $("#footer .my-input").keydown(function (e) {
+            if (e.keyCode == 13) {
+                return send();
+            }
+        });
+    })
+
+    /* 对方消息div */
+    function reply(headSrc, str) {
+        var html = "<div class='reply'><div class='msg'><img src=" + headSrc + " /><span class='name'>客服</span><p><i class='msg_input'></i>" + str + "</p></div></div>";
+        return upView(html);
+    }
+
+    /* 自己消息div */
+    function ask(headSrc, str) {
+        var html = "<div class='ask'><div class='msg'><img src=" + headSrc + " />" + "<p><i class='msg_input'></i>" + str + "</p></div></div>";
+        return upView(html);
+    }
+
+    function upView(html) {
+        var message = $('#message');
+        message.append(html);
+        var h = message.outerHeight() - window.innerHeight;
+        window.scrollTo(0, document.body.scrollHeight)
+        return;
+    }
+
+    function send() {
+        if (canSend) {
+            var input = $("#footer .my-input");
+            var val = input.val()
+            var obj = {user_id: '${user.id}', message: val, chat_type: "user_chat"}
+            ws.send(JSON.stringify(obj));
+            //ask("/${res}/chat/images/touxiangm.png", val);
+            input.val('');
+        }
+    }
+
+</script>
+</body>
+</html>

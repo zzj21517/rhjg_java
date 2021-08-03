@@ -1,0 +1,347 @@
+<view class="page">
+
+<block wx:if="{{! showLoading}}">
+
+  <view class="search-bar">
+    <input class="search-txt" placeholder-class="search-txt-plc" bindfocus="viewSearch01" placeholder="搜索服务/人才" type="text"/>
+    <button style="display:inline-block; height:60rpx;line-height:60rpx; margin-left:5rpx; font-size:13px; background-color:#FA8072; color:white;" bindtap='releaseItem'>发单</button>
+</view>
+
+  <swiper class="banner" indicator-dots="true" autoplay="true">
+        <block wx:for="{{bannerList}}" wx:for-item="bannerItem" wx:for-index="bannerIndex" wx:key="banner">
+            <swiper-item data-type="{{bannerItem.item_type}}" data-id="{{bannerItem.short_code}}" bindtap="{{bannerItem.img_desc}}">
+                <image src="{{bannerItem.img_path}}" class="banner-item"></image>
+            </swiper-item>
+        </block>
+  </swiper>
+
+
+  <view style="margin-top:10px;">
+    <view class="user_item1" bindtap='HelpFindMan'>
+      <view class="people_img1">
+        <image  src="/images/index/zaojia.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px;">
+          造价预算
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='PingTaiHeZuo'>
+      <view class="people_img1">
+        <image  src="/images/index/shangwubiaoshu.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px; font-size:13px;">
+          商务标书
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='MaoSuiZiJian'>
+      <view class="people_img1">
+        <image  src="/images/index/jishubiaoshu.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px; ">
+          技术标书
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='TuiJianRenYuan'>
+      <view class="people_img1">
+        <image  src="/images/index/jisuan.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px;">
+          结算服务
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='viewBannerDetail'>
+      <view class="people_img1">
+        <image  src="/images/index/duishen.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px; ">
+          对审服务
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view>
+    <view class="user_item1" bindtap='HelpFindMan'>
+      <view class="people_img1">
+        <image  src="/images/index/gongchengziliao.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px;">
+          工程资料
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='PingTaiHeZuo'>
+      <view class="people_img1">
+        <image  src="/images/index/gaizhang.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px; font-size:13px;">
+          盖章服务
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='MaoSuiZiJian'>
+      <view class="people_img1">
+        <image  src="/images/index/jungongtu.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px; ">
+          画竣工图
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='TuiJianRenYuan'>
+      <view class="people_img1">
+        <image  src="/images/index/wangluotu.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px;">
+          画网络图
+        </view>
+      </view>
+    </view>
+
+    <view class="user_item1" bindtap='viewBannerDetail'>
+      <view class="people_img1">
+        <image  src="/images/index/jinggong.png" mode="scaleToFill"></image>
+        <view style="margin-top:15px; ">
+          精工精选
+        </view>
+      </view>
+    </view>
+
+    <view class="panel_banner">
+    
+    </view>
+
+    <view class="panel_search">
+      <view class="inputView" style="margin-left:30px;margin-top:20px; padding-top:10px;"> 
+          <input class="inputText" placeholder="找人才，如造价/预算" placeholder-style="margin-left:10px;" bindinput="nameInput" style="width:90%; text-align:left; margin-top:9px; border:1px solid #D1D1D1; height:30px;"/>
+      </view>
+
+      <view class="inputView" style="margin-left:30px;margin-top:20px;"> 
+          <input class="inputText" placeholder="请输入手机号" placeholder-style="margin-left:10px;" bindinput="phoneInput" style="width:90%; text-align:left; margin-top:9px; border:1px solid #D1D1D1; height:30px;"/>
+      </view>
+
+      <view class="inputView" style="margin-left:30px;margin-top:10px;"> 
+          <input class="inputText" placeholder="请输入验证码" placeholder-style="margin-left:10px;" bindinput="phoneInput" style="width:65%; text-align:left; margin-top:9px; border:1px solid #D1D1D1; height:30px; float:left; display:inline-block;"/>
+          <view style="float:left; height:30px; display:inline-block; border-top:1px solid #D1D1D1;border-bottom:1px solid #D1D1D1; margin-top:9px;border-right:1px solid #D1D1D1; line-height:30px; color:white;font-weight:bolder;background-color:#DE3B41; padding:0px 8px 0px 8px; font-family:微软雅黑;">
+          发送验证码
+          </view>
+      </view>
+
+      <button class="loginBtn" type="primary" size="{{primarySize}}" plain="{{plain}}"  style="background-color:#DE3B41; margin:30px 20px 10px 20px;; width:88%; font-size:15px; display:inline-block; font-family:微软雅黑; "  bindtap="login">马上为我推荐</button>
+
+      <view class="mini_logo" style="margin-left:20px;">
+        <image  src="/images/index/guangsu.png" mode="scaleToFill"></image> 
+        <view style="display:inline-block; margin-left:10px; padding-bottom:15px; vertical-align:middle; line-height:50px;">光速匹配</view>
+      </view>
+
+      <view class="mini_logo" style="margin-left:22px;">
+        <image  src="/images/index/hubao.png" mode="scaleToFill"></image> 
+        <view style="display:inline-block; margin-left:10px; padding-bottom:15px; vertical-align:middle; line-height:50px;">平台互保</view>
+      </view>
+
+      <view class="mini_logo" style="margin-left:22px;">
+        <image  src="/images/index/pingzhi.png" mode="scaleToFill"></image> 
+        <view style="display:inline-block; margin-left:10px; padding-bottom:15px; vertical-align:middle; line-height:50px;">品质保证</view>
+      </view>
+    </view>
+
+    <view class="panel_four">
+      <view class="panel_four_title">
+      精工精选4S<text style="margin-left:200px; font-size:12px; color:#ddd; font-weight:normal;">更多></text>
+      </view>
+
+      <view class="panel_four_left">
+        <view style="margin-left:20px; color:#999999; margin-top:10px; font-size:12px;">
+          3次筛选1次精选/5星级用户认可/靠谱
+          </view>
+
+          <view class="mini_short" style="margin-left:22px;">
+            <image  src="/images/index/zhushi.png" mode="scaleToFill"></image> 
+            <view style="display:inline-block; margin-left:7px; padding-bottom:5px; vertical-align:middle; line-height:50px; font-size:12px;">工程师水平关系决定总价，信赖高水准</view>
+          </view>
+      </view>
+
+      <view class="panel_four_right">
+      
+      </view>
+      
+    </view>
+
+    <view class="panel_intel">
+      <view class="panel_four_title">
+      智能推荐<text style="margin-left:200px; font-size:14px; color:#ddd; font-weight:normal;">修改需求></text>
+      </view>
+
+      <view class="nav bc_white">
+        <scroll-view class="categories" scroll-x="true">
+        <view class="sel_category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+        <view class="category">猜你喜欢</view>
+    </scroll-view>
+      </view>
+    </view>
+
+    <view class="panel_mall">
+      <view class="mall_title">
+      大海语堂 
+      </view>
+      <view class="type_mark">
+      保
+      </view>
+      <view class="team_mark">
+      个人
+      </view>
+      <view class="city_mark">
+      西安
+      </view>
+
+      <view style="margin-top:10px; margin-left:10px;">
+        服务客户<text style="color:#DE3B41;">102</text>个    成交额<text style="color:#DE3B41;">85928</text>元
+      </view>
+
+      <view style="margin-top:10px; margin-left:10px; font-size:14px;color:#999999;">
+        擅长：土建/安装/园林绿化/能对审级/能做全国业务
+      </view>
+
+      <view class="demo_line_01"></view>
+
+      <view class="mall_logo">
+        <view class="logo_left">
+          <view class="people_img">
+            <image src="/image/zuanshi2.png" mode="scaleToFill"></image>
+          </view>
+
+          <view style="margin-top:110px;margin-left:5px;">
+          4.95
+          <view class="star">
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+          </view> 
+          
+          </view>
+          
+        </view>
+
+        <view class="logo_right">
+          <view class="logo_right_title">
+          酒店专修/样板房装修/售楼处专修
+          </view>
+
+          <view class="logo_right_price">
+          ￥<text style="color:#DE3B41;">500</text>起
+          </view>
+
+          <view class='zixun_mark'>
+          免费咨询
+          </view>
+
+          <view class="note_panel">
+            技术精湛，及其认真负责，期待下次合作，技术精湛，及其认真负责，期待下次合作
+          </view>
+        </view>
+      </view>
+
+      <view class="demo_line_01"></view>
+
+      <view style="text-align:center; margin-top:20px; margin-bottom:20px;">
+       查看全部服务和案例>
+      </view>
+
+    </view>
+
+    <view class="panel_mall">
+      <view class="mall_title">
+      大海语堂 
+      </view>
+      <view class="type_mark">
+      保
+      </view>
+      <view class="team_mark">
+      个人
+      </view>
+      <view class="city_mark">
+      西安
+      </view>
+
+      <view style="margin-top:10px; margin-left:10px;">
+        服务客户<text style="color:#DE3B41;">102</text>个    成交额<text style="color:#DE3B41;">85928</text>元
+      </view>
+
+      <view style="margin-top:10px; margin-left:10px; font-size:14px;color:#999999;">
+        擅长：土建/安装/园林绿化/能对审级/能做全国业务
+      </view>
+
+      <view class="demo_line_01"></view>
+
+      <view class="mall_logo">
+        <view class="logo_left">
+          <view class="people_img">
+            <image src="/image/zuanshi2.png" mode="scaleToFill"></image>
+          </view>
+
+          <view style="margin-top:110px;margin-left:5px;">
+          4.95
+          <view class="star">
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+            <image  src="/images/index/xing_1.png" mode="scaleToFill"></image>
+          </view> 
+          
+          </view>
+          
+        </view>
+
+        <view class="logo_right">
+          <view class="logo_right_title">
+          酒店专修/样板房装修/售楼处专修
+          </view>
+
+          <view class="logo_right_price">
+          ￥<text style="color:#DE3B41;">500</text>起
+          </view>
+
+          <view class='zixun_mark'>
+          免费咨询
+          </view>
+
+          <view class="note_panel">
+            技术精湛，及其认真负责，期待下次合作，技术精湛，及其认真负责，期待下次合作
+          </view>
+        </view>
+      </view>
+
+      <view class="demo_line_01"></view>
+
+      <view style="text-align:center; margin-top:20px; margin-bottom:20px;">
+       查看全部服务和案例>
+      </view>
+
+    </view>
+    
+
+
+
+
+
+
+
+  </view>
+
+   
+
+</block>
+</view>

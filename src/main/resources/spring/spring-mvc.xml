@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!-- 解决中文乱码 -->
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="true">
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/plain;charset=UTF-8</value>
+						<value>text/html;charset=UTF-8</value>
+						<value>application/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<!-- 本地缓存,采用框架统一的EH -->
+
+	<!-- 扫描controller -->
+	<context:component-scan base-package="com.lxh">
+		<!-- <context:exclude-filter type="regex"
+			expression="com.epoint.common.cert.authentication.*" />
+		<context:exclude-filter type="regex"
+			expression="com.epoint.basic.auditonlineuser.auditonlinecloud.impl.*" /> -->
+	</context:component-scan>
+	<!-- HandlerMapping -->
+  <bean
+	       class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
+
+	   <!-- HandlerAdapter -->
+    <bean
+     class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+
+	<!-- Spring 上下文环境工具 -->
+	<bean
+			class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
+
+	<!-- 支持返回json(避免IE在ajax请求时，返回json出现下载 ) -->
+	<bean id="utf8Charset" class="java.nio.charset.Charset"
+		  factory-method="forName">
+		<constructor-arg value="UTF-8" />
+	</bean>
+	<bean
+			class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<bean
+						class="org.springframework.http.converter.StringHttpMessageConverter">
+					<constructor-arg ref="utf8Charset" />
+				</bean>
+				<bean id="mappingJacksonHttpMessageConverter"
+					  class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/plain;charset=UTF-8</value>
+							<value>application/json;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter" />
+	<bean
+			class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+
+	<!-- 配置上传文件的组件 id的值必须为“multipartResolver” -->
+	<!-- class spring-web  org.springframework.web.multipart.commons -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 配置最大的上传文件10兆 -->
+		<property name="maxUploadSize" value="10000000"></property>
+		<!-- 设置默认的编码格式 -->
+		<property name="defaultEncoding" value="utf-8"></property>
+	</bean>
+		<!-- 静态资源处理 -->
+	<mvc:resources mapping="/**/[*.html]" location="/"
+				   cache-period="0">
+		<mvc:resource-chain resource-cache="true">
+			<mvc:resolvers>
+				<bean class="org.springframework.web.servlet.resource.GzipResourceResolver" />
+			</mvc:resolvers>
+		</mvc:resource-chain>
+	</mvc:resources>
+
+	<!-- spring rabbitmq监听配置 -->
+	<!-- <import resource="spring-rabbitmq.xml"/> -->
+</beans>
