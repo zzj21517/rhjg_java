@@ -427,7 +427,7 @@ public class RegisterController {
 
        //微信小程序手机号一键登录
        @RequestMapping(value = "/wxlogin", method = RequestMethod.POST)
-       public String getOpenid(@RequestBody String params) {
+       public String wxLogin(@RequestBody String params) {
            JSONObject rJsonObject = new JSONObject();
            JSONObject jsonObject = JSONObject.parseObject(params);
            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
@@ -444,12 +444,15 @@ public class RegisterController {
                String tokenUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
                String oauthResponseText = HttpClient.doGet(tokenUrl);
                com.alibaba.fastjson.JSONObject jo = com.alibaba.fastjson.JSONObject.parseObject(oauthResponseText);
-               Map<String, String> resultMap = new HashMap<String, String>();
-               //    获取手机号
-               JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(secret,encryptedData,iv);
-               String phoneNumber = phoneInfo.get("phoneNumber").toString();
-               if (jo.get("openid") != null && !"".equals(jo.get("openid")) && phoneNumber !=null) {
-                   rJsonObject.put("op`enid", jo.get("openid").toString());
+//               && phoneNumber !=null
+               if (jo.get("openid") != null && !"".equals(jo.get("openid"))) {
+                   rJsonObject.put("openid", jo.get("openid").toString());
+                   //    获取手机号
+                   String session_key=jo.get("session_key").toString();
+                   JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(session_key,encryptedData,iv);
+                   System.out.println(phoneInfo.toString());
+                   String phoneNumber = phoneInfo.get("phoneNumber").toString();
+                   System.out.println(phoneNumber);
                    rJsonObject.put("phoneNumber",phoneNumber);
                    rJsonObject.put("code", "200");
                } else {
@@ -479,8 +482,10 @@ public class RegisterController {
             String secret = PropertiesUtil.getPropertyValue("secret");
             String tokenUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
             String oauthResponseText = HttpClient.doGet(tokenUrl);
+            System.out.println(oauthResponseText);
             com.alibaba.fastjson.JSONObject jo = com.alibaba.fastjson.JSONObject.parseObject(oauthResponseText);
             Map<String, String> resultMap = new HashMap<String, String>();
+            System.out.println(jo.get("openid"));
             if (jo.get("openid") != null && !"".equals(jo.get("openid"))) {
                 rJsonObject.put("openid", jo.get("openid").toString());
                 rJsonObject.put("code", "200");
