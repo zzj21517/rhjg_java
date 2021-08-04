@@ -449,7 +449,7 @@ public class RegisterController {
                JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(secret,encryptedData,iv);
                String phoneNumber = phoneInfo.get("phoneNumber").toString();
                if (jo.get("openid") != null && !"".equals(jo.get("openid"))&&phoneNumber) {
-                   rJsonObject.put("openid", jo.get("openid").toString());
+                   rJsonObject.put("op`enid", jo.get("openid").toString());
                    rJsonObject.put("phoneNumber",phoneNumber)
                    rJsonObject.put("code", "200");
                } else {
