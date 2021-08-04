@@ -1,5 +1,6 @@
 package com.lxh.newrhjg.rest;
 
+import com.lxh.newrhjg.util.WechatDecryptDataUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.lxh.newrhjg.api.IframePeople;
 import com.lxh.newrhjg.api.IframePeopleExtend;
@@ -423,6 +424,44 @@ public class RegisterController {
         }
         return rJsonObject.toJSONString();
     }
+
+       //微信小程序手机号一键登录
+       @RequestMapping(value = "/wxlogin", method = RequestMethod.POST)
+       public String getOpenid(@RequestBody String params) {
+           JSONObject rJsonObject = new JSONObject();
+           JSONObject jsonObject = JSONObject.parseObject(params);
+           jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+           // 错误信息
+           String errorMsg = "";
+           // 解析参数
+           String code = jsonObject.get("code").toString();
+           String encryptedData=jsonObject.get("encryptedData").toString();
+           String iv=jsonObject.get('iv').toString();
+           try {
+               PropertiesUtil.loadFile("encode.properties");
+               String appid = PropertiesUtil.getPropertyValue("appid");
+               String secret = PropertiesUtil.getPropertyValue("secret");
+               String tokenUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
+               String oauthResponseText = HttpClient.doGet(tokenUrl);
+               com.alibaba.fastjson.JSONObject jo = com.alibaba.fastjson.JSONObject.parseObject(oauthResponseText);
+               Map<String, String> resultMap = new HashMap<String, String>();
+               //    获取手机号
+               JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(secret,encryptedData,iv);
+               String phoneNumber = phoneInfo.get("phoneNumber").toString();
+               if (jo.get("openid") != null && !"".equals(jo.get("openid"))&&phoneNumber) {
+                   rJsonObject.put("openid", jo.get("openid").toString());
+                   rJsonObject.put("phoneNumber",phoneNumber)
+                   rJsonObject.put("code", "200");
+               } else {
+                   rJsonObject.put("code", "400");
+                   rJsonObject.put("msg", jo.get("errmsg").toString());
+               }
+           } catch (Exception e) {
+               rJsonObject.put("code", "400");
+           }
+   
+           return rJsonObject.toJSONString();
+       }
 
     //获取小程序用户openid
     @RequestMapping(value = "/getopenid", method = RequestMethod.POST)
