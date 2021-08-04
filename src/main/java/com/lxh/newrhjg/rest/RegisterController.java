@@ -436,7 +436,7 @@ public class RegisterController {
            // 解析参数
            String code = jsonObject.get("code").toString();
            String encryptedData=jsonObject.get("encryptedData").toString();
-           String iv=jsonObject.get('iv').toString();
+           String iv=jsonObject.get("iv").toString();
            try {
                PropertiesUtil.loadFile("encode.properties");
                String appid = PropertiesUtil.getPropertyValue("appid");
@@ -448,9 +448,9 @@ public class RegisterController {
                //    获取手机号
                JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(secret,encryptedData,iv);
                String phoneNumber = phoneInfo.get("phoneNumber").toString();
-               if (jo.get("openid") != null && !"".equals(jo.get("openid"))&&phoneNumber) {
+               if (jo.get("openid") != null && !"".equals(jo.get("openid")) && phoneNumber !=null) {
                    rJsonObject.put("op`enid", jo.get("openid").toString());
-                   rJsonObject.put("phoneNumber",phoneNumber)
+                   rJsonObject.put("phoneNumber",phoneNumber);
                    rJsonObject.put("code", "200");
                } else {
                    rJsonObject.put("code", "400");
