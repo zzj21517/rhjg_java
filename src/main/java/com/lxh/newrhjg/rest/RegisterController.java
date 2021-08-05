@@ -58,7 +58,7 @@ public class RegisterController {
      /*   String familiar = jsonObject.get("familiar").toString();
         String familiarChina = jsonObject.get("familiarChina").toString();*/
         String areaPro = jsonObject.get("areaPro").toString();
-     /*   String subTool = jsonObject.get("subTool").toString();*/
+        /*   String subTool = jsonObject.get("subTool").toString();*/
         String isDS = jsonObject.get("isDS").toString();
         String isPro = jsonObject.get("isPro").toString();
         String superDes = jsonObject.get("superDes").toString();
@@ -123,7 +123,7 @@ public class RegisterController {
                             break;
                     }
                     //插入老库用户表
-                    if(!IsUidExistOld(phone)) {
+                    if (!IsUidExistOld(phone)) {
                         SMART_PEOPLE smartPeople = new SMART_PEOPLE();
                         smartPeople.setGUID(rowGuid);
                         smartPeople.setUSER_ID(phone);
@@ -160,9 +160,9 @@ public class RegisterController {
         String iconurl = jsonObject.get("iconurl").toString();
         //String familiar = jsonObject.get("familiar").toString();
         //String familiarChina = jsonObject.get("familiarChina").toString();
-       // String areaPro = jsonObject.get("areaPro").toString();
-       // String subTool = jsonObject.get("subTool").toString();
-       // String isDS = jsonObject.get("isDS").toString();
+        // String areaPro = jsonObject.get("areaPro").toString();
+        // String subTool = jsonObject.get("subTool").toString();
+        // String isDS = jsonObject.get("isDS").toString();
         //String isPro = jsonObject.get("isPro").toString();
         //String superDes = jsonObject.get("superDes").toString();
         String verifyCode = jsonObject.get("verifyCode").toString();
@@ -194,7 +194,7 @@ public class RegisterController {
                     rJsonObject.put("code", "400");
                 } else {
                     //插入老库用户表
-                    if(!IsUidExistOld(phone)) {
+                    if (!IsUidExistOld(phone)) {
                         SMART_PEOPLE smartPeople = new SMART_PEOPLE();
                         smartPeople.setGUID(rowGuid);
                         smartPeople.setUSER_ID(phone);
@@ -228,7 +228,7 @@ public class RegisterController {
         String openid = jsonObject.get("openid").toString();
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String datatime = sDateFormat.format(new Date());
-      if (!IsVerifyCode(phone, verifyCode)) {
+        if (!IsVerifyCode(phone, verifyCode)) {
             rJsonObject.put("code", "300");//验证码不正确
             return rJsonObject.toJSONString();
         }
@@ -253,38 +253,38 @@ public class RegisterController {
                 iframePeople.insert(people);
                 record = people;
                 //发送初始化密码
-                String contents="【融汇精工】您本次注册账号的初始化密码是："+value+"，请注意保存";
-                sendMsg(contents,phone);
+                String contents = "【融汇精工】您本次注册账号的初始化密码是：" + value + "，请注意保存";
+                sendMsg(contents, phone);
             }
             //不为空插入项目信息
             if (!"".equals(content)) {
-                    //插入投标信息
-                    SMART_PROJECT smartProject = new SMART_PROJECT();
-                    String project_num = GetRuleStr("PROJECT_NUM");
-                    smartProject.setLINK_TEL(phone);
-                    smartProject.setCUST_ID(phone);
-                    smartProject.setPROJECT_DESC(content);
-                    smartProject.setPROJECT_NUM("N"+project_num);
-                    smartProject.setDATATIME(datatime);
-                    smartProject.setSTATUS("00");
-                    int n = iProject.InsertProject(smartProject);
-                    if (n == 0) {
-                        rJsonObject.put("code", "400");
-                        rJsonObject.put("error", "项目信息插入失败");
+                //插入投标信息
+                SMART_PROJECT smartProject = new SMART_PROJECT();
+                String project_num = GetRuleStr("PROJECT_NUM");
+                smartProject.setLINK_TEL(phone);
+                smartProject.setCUST_ID(phone);
+                smartProject.setPROJECT_DESC(content);
+                smartProject.setPROJECT_NUM("N" + project_num);
+                smartProject.setDATATIME(datatime);
+                smartProject.setSTATUS("00");
+                int n = iProject.InsertProject(smartProject);
+                if (n == 0) {
+                    rJsonObject.put("code", "400");
+                    rJsonObject.put("error", "项目信息插入失败");
 
-                    } else {
-                        //插入老库项目信息
-                     iProject.InsertoldProject(smartProject);
-                        rJsonObject.put("result", record);
-                        rJsonObject.put("code", "200");
-                    }
-                }else{
+                } else {
+                    //插入老库项目信息
+                    iProject.InsertoldProject(smartProject);
                     rJsonObject.put("result", record);
                     rJsonObject.put("code", "200");
                 }
+            } else {
+                rJsonObject.put("result", record);
+                rJsonObject.put("code", "200");
+            }
             //
             //插入老库用户表
-            if(!IsUidExistOld(phone)) {
+            if (!IsUidExistOld(phone)) {
                 SMART_PEOPLE smartPeople = new SMART_PEOPLE();
                 smartPeople.setGUID(rowGuid);
                 smartPeople.setUSER_ID(phone);
@@ -312,22 +312,23 @@ public class RegisterController {
         String phone = jsonObject.get("phone").toString();
         String oldphone = jsonObject.get("oldphone").toString();
         String verifyCode = jsonObject.get("verifyCode").toString();
-        boolean result= IsVerifyCode(phone,verifyCode);//判断验证码是否正确
-       if(!result){
-           rJsonObject.put("code", "300");
-           return  rJsonObject.toJSONString();
-       }
-        FramePeople people =iframePeople.findPeople("phone",oldphone);
-        if(people!=null){//老用户信息
+        boolean result = IsVerifyCode(phone, verifyCode);//判断验证码是否正确
+        if (!result) {
+            rJsonObject.put("code", "300");
+            return rJsonObject.toJSONString();
+        }
+        FramePeople people = iframePeople.findPeople("phone", oldphone);
+        if (people != null) {//老用户信息
             people.setPhone(phone);
             iframePeople.update(people);
             rJsonObject.put("code", "200");
-        }else{
+        } else {
             rJsonObject.put("code", "400");
         }
         return rJsonObject.toJSONString();
 
     }
+
     /*
      * 修改密码
      */
@@ -339,22 +340,23 @@ public class RegisterController {
         String phone = jsonObject.get("phone").toString();
         String password = jsonObject.get("password").toString();
         String verifyCode = jsonObject.get("verifyCode").toString();
-        boolean result= IsVerifyCode(phone,verifyCode);//判断验证码是否正确
-        if(!result){
+        boolean result = IsVerifyCode(phone, verifyCode);//判断验证码是否正确
+        if (!result) {
             rJsonObject.put("code", "300");
-            return  rJsonObject.toJSONString();
+            return rJsonObject.toJSONString();
         }
-        FramePeople people =iframePeople.findPeople("phone",phone);
-        if(people!=null){//老用户信息
+        FramePeople people = iframePeople.findPeople("phone", phone);
+        if (people != null) {//老用户信息
             people.setPassword(MD5Utils.stringToMD5(String.valueOf(password)));
             iframePeople.update(people);
             rJsonObject.put("code", "200");
-        }else{
+        } else {
             rJsonObject.put("code", "400");
         }
         return rJsonObject.toJSONString();
 
     }
+
     //验证验证码
     @RequestMapping(value = "/isVerifyCode", method = RequestMethod.POST)
     public String isVerifyCode(@RequestBody String params) {
@@ -363,14 +365,15 @@ public class RegisterController {
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String phone = jsonObject.get("phone").toString();
         String verifyCode = jsonObject.get("verifyCode").toString();
-         boolean result= IsVerifyCode(phone,verifyCode);
-         if(result){
-             rJsonObject.put("code", "200");
-         }else{
-             rJsonObject.put("code", "400");
-         }
+        boolean result = IsVerifyCode(phone, verifyCode);
+        if (result) {
+            rJsonObject.put("code", "200");
+        } else {
+            rJsonObject.put("code", "400");
+        }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 获取验证码
      */
@@ -425,46 +428,64 @@ public class RegisterController {
         return rJsonObject.toJSONString();
     }
 
-       //微信小程序手机号一键登录
-       @RequestMapping(value = "/wxlogin", method = RequestMethod.POST)
-       public String wxLogin(@RequestBody String params) {
-           JSONObject rJsonObject = new JSONObject();
-           JSONObject jsonObject = JSONObject.parseObject(params);
-           jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
-           // 错误信息
-           String errorMsg = "";
-           // 解析参数
-           String code = jsonObject.get("code").toString();
-           String encryptedData=jsonObject.get("encryptedData").toString();
-           String iv=jsonObject.get("iv").toString();
-           try {
-               PropertiesUtil.loadFile("encode.properties");
-               String appid = PropertiesUtil.getPropertyValue("appid");
-               String secret = PropertiesUtil.getPropertyValue("secret");
-               String tokenUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
-               String oauthResponseText = HttpClient.doGet(tokenUrl);
-               com.alibaba.fastjson.JSONObject jo = com.alibaba.fastjson.JSONObject.parseObject(oauthResponseText);
+    //微信小程序手机号一键登录
+    @RequestMapping(value = "/wxlogin", method = RequestMethod.POST)
+    public String wxLogin(@RequestBody String params) {
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        // 错误信息
+        String errorMsg = "";
+        // 解析参数
+        String code = jsonObject.get("code").toString();
+        String encryptedData = jsonObject.get("encryptedData").toString();
+        String iv = jsonObject.get("iv").toString();
+        try {
+            PropertiesUtil.loadFile("encode.properties");
+            String appid = PropertiesUtil.getPropertyValue("appid");
+            String secret = PropertiesUtil.getPropertyValue("secret");
+            String tokenUrl = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid + "&secret=" + secret + "&js_code=" + code + "&grant_type=authorization_code";
+            String oauthResponseText = HttpClient.doGet(tokenUrl);
+            com.alibaba.fastjson.JSONObject jo = com.alibaba.fastjson.JSONObject.parseObject(oauthResponseText);
 //               && phoneNumber !=null
-               if (jo.get("openid") != null && !"".equals(jo.get("openid"))) {
-                   rJsonObject.put("openid", jo.get("openid").toString());
-                   //    获取手机号
-                   String session_key=jo.get("session_key").toString();
-                   JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(session_key,encryptedData,iv);
-                   System.out.println(phoneInfo.toString());
-                   String phoneNumber = phoneInfo.get("phoneNumber").toString();
-                   System.out.println(phoneNumber);
-                   rJsonObject.put("phoneNumber",phoneNumber);
-                   rJsonObject.put("code", "200");
-               } else {
-                   rJsonObject.put("code", "400");
-                   rJsonObject.put("msg", jo.get("errmsg").toString());
-               }
-           } catch (Exception e) {
-               rJsonObject.put("code", "400");
-           }
-   
-           return rJsonObject.toJSONString();
-       }
+            if (jo.get("openid") != null && !"".equals(jo.get("openid"))) {
+                rJsonObject.put("openid", jo.get("openid").toString());
+                //    获取手机号
+                String session_key = jo.get("session_key").toString();
+                JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(session_key, encryptedData, iv);
+                System.out.println(phoneInfo.toString());
+                String phoneNumber = phoneInfo.get("phoneNumber").toString();
+                System.out.println(phoneNumber);
+                rJsonObject.put("phoneNumber", phoneNumber);
+//                    插入用户
+                FramePeople record = null;
+                record = iframePeople.findPeople("phone", phoneNumber);
+                if (record == null) {//初始化用户registerUser
+                    FramePeople people = new FramePeople();
+                    people.setPhone(phoneNumber);
+                    people.setOpenId(jo.get("openid").toString());
+                    iframePeople.insert(people);
+                    record = people;
+                } else if (record.getOpenId() == null) {
+                    record.setOpenId(jo.get("openid").toString());
+                }
+                int n = iframePeople.insert(record);
+                if (n == 0) {
+                    rJsonObject.put("code", "400");
+                    rJsonObject.put("error", "登录失败!");
+                } else {
+                    rJsonObject.put("code", "200");
+                }
+            } else {
+                rJsonObject.put("code", "400");
+                rJsonObject.put("msg", jo.get("errmsg").toString());
+            }
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
+        }
+
+        return rJsonObject.toJSONString();
+    }
 
     //获取小程序用户openid
     @RequestMapping(value = "/getopenid", method = RequestMethod.POST)
@@ -505,41 +526,20 @@ public class RegisterController {
     public String bindOpenid(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        try{
-        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
-        String userguid=jsonObject.get("userguid").toString();
-        String openid=jsonObject.get("openid").toString();
-             if(IsOpenidExist(openid)){//如果openid已经绑定用户
-                 rJsonObject.put("code", "200");
-                 return  rJsonObject.toJSONString();
-             }
-             FramePeople people =iframePeople.findPeople("rowguid",userguid);
-             if(people!=null){//老用户信息
-                 people.setOpenId(openid);
-                 iframePeople.update(people);
-                 rJsonObject.put("code", "200");
-             }else{
-                 rJsonObject.put("code", "400");
-             }
-         } catch (Exception e) {
-            rJsonObject.put("code", "400");
-        }
-         return rJsonObject.toJSONString();
-    }
-    //绑定小程序用户openid
-    @RequestMapping(value = "/unBindOpenid", method = RequestMethod.POST)
-    public String unBindOpenid(@RequestBody String params) {
-        JSONObject rJsonObject = new JSONObject();
-        JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
-        String userguid=jsonObject.get("userguid").toString();
-        try{
-            FramePeople people =iframePeople.findPeople("rowguid",userguid);
-            if(people!=null){//老用户信息
-                people.setOpenId("");
+        try {
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String userguid = jsonObject.get("userguid").toString();
+            String openid = jsonObject.get("openid").toString();
+            if (IsOpenidExist(openid)) {//如果openid已经绑定用户
+                rJsonObject.put("code", "200");
+                return rJsonObject.toJSONString();
+            }
+            FramePeople people = iframePeople.findPeople("rowguid", userguid);
+            if (people != null) {//老用户信息
+                people.setOpenId(openid);
                 iframePeople.update(people);
                 rJsonObject.put("code", "200");
-            }else{
+            } else {
                 rJsonObject.put("code", "400");
             }
         } catch (Exception e) {
@@ -547,8 +547,31 @@ public class RegisterController {
         }
         return rJsonObject.toJSONString();
     }
-    public String sendMsg(String content,String phone){
-        String code="";
+
+    //绑定小程序用户openid
+    @RequestMapping(value = "/unBindOpenid", method = RequestMethod.POST)
+    public String unBindOpenid(@RequestBody String params) {
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String userguid = jsonObject.get("userguid").toString();
+        try {
+            FramePeople people = iframePeople.findPeople("rowguid", userguid);
+            if (people != null) {//老用户信息
+                people.setOpenId("");
+                iframePeople.update(people);
+                rJsonObject.put("code", "200");
+            } else {
+                rJsonObject.put("code", "400");
+            }
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    public String sendMsg(String content, String phone) {
+        String code = "";
         String smsapi = "http://api.smsbao.com/";
         String user = "szgf"; //短信平台帐号
         String pass = MD5Utils.stringToMD5("shihoufeng2012"); //短信平台密码
@@ -560,8 +583,9 @@ public class RegisterController {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        return  code;
+        return code;
     }
+
     /*
      * 判断注册账号是否存在
      */
@@ -577,6 +601,7 @@ public class RegisterController {
             }
         }
     }
+
     /*
      * 判断注册账号是否存在
      */
@@ -592,6 +617,7 @@ public class RegisterController {
             }
         }
     }
+
     /*
      * 判断验证码是否正确
      */
@@ -650,20 +676,19 @@ public class RegisterController {
         }
         return returnvalue;
     }
+
     /*
      * 判断注册账号是否存在
      */
-    public boolean IsUidExistOld(String uid){
-        if("".equals(uid)||uid==null){
-            return  false;
-        }
-        else{
-            SMART_PEOPLE smartPeople=iPeople.findPeople("USER_ID",uid);
-            if(smartPeople!=null){
+    public boolean IsUidExistOld(String uid) {
+        if ("".equals(uid) || uid == null) {
+            return false;
+        } else {
+            SMART_PEOPLE smartPeople = iPeople.findPeople("USER_ID", uid);
+            if (smartPeople != null) {
                 return true;
-            }
-            else{
-                return  false;
+            } else {
+                return false;
             }
         }
     }
