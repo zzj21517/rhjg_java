@@ -1,4 +1,4 @@
-package com.lxh.newrhjg.util;
+package com.lxh.newrhjg.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -19,17 +19,18 @@ public class WechatDecryptDataUtil {
         System.out.println(session_key);
         System.out.println(encryptedData);
         System.out.println(iv);
-        // 这个是为了前端传过来可能会有转义字符变成空所以替换
-        String s = encryptedData.replaceAll(" ", "+");
-        byte[] dataByte = Base64.decode(s);
-        // 加密秘钥
-        byte[] keyByte = Base64.decode(session_key);
-        // 偏移量
-        byte[] ivByte = Base64.decode(iv);
-        System.out.println(dataByte.toString());
-        System.out.println(keyByte.toString());
-        System.out.println(ivByte.toString());
         try {
+            // 这个是为了前端传过来可能会有转义字符变成空所以替换
+            byte[] dataByte = Base64.decode(encryptedData);
+            System.out.println(8);
+            // 加密秘钥
+            byte[] keyByte = Base64.decode(session_key);
+            System.out.println(9);
+            // 偏移量
+            byte[] ivByte = Base64.decode(iv);
+            System.out.println(dataByte.toString());
+            System.out.println(keyByte.toString());
+            System.out.println(ivByte.toString());
             System.out.println('1');
             // 如果密钥不足16位，那么就补足.  这个if 中的内容很重要
             int base = 16;
@@ -43,7 +44,7 @@ public class WechatDecryptDataUtil {
             }
             // 初始化
             Security.addProvider(new BouncyCastleProvider());
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding","BC");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
             SecretKeySpec spec = new SecretKeySpec(keyByte, "AES");
             AlgorithmParameters parameters = AlgorithmParameters.getInstance("AES");
             parameters.init(new IvParameterSpec(ivByte));

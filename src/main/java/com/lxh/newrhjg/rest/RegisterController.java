@@ -1,6 +1,6 @@
 package com.lxh.newrhjg.rest;
 
-import com.lxh.newrhjg.util.WechatDecryptDataUtil;
+import com.lxh.newrhjg.utils.WechatDecryptDataUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.lxh.newrhjg.api.IframePeople;
 import com.lxh.newrhjg.api.IframePeopleExtend;
