@@ -1,31 +1,55 @@
 package com.lxh.newrhjg.entity;
 
 public class FramePeople {
-    private  int row_id;
-    private  String rowGuid;
-    private  String phone;
-    private  String usertype;
-    private  int dealNum;
-    private  double dealMoney;
-    private  String iconurl;
-    private  String familiar;
-    private  String familiarChina;
-    private  String areaPro;
-    private  String subTool;
-    private  String isDS;
-    private  int isPro;
-    private  String superDes;
-    private  String registerTime;
-    private  String password;
-    private String openId;
-    private  String nickName;
-    private  String score;
-    private  String finishPer;
-    private  String custom;
+    private int row_id;
+    private String rowGuid;
+    private String phone;
+    private String usertype;
+    private int userFlag;
+    private int dealNum;
+    private double dealMoney;
 
-    private  String bzj;
-    private  String cjs;
-    private  String cje;
+    public int getUserFlag() {
+        return userFlag;
+    }
+
+    public void setUserFlag(int userFlag) {
+        this.userFlag = userFlag;
+    }
+
+    private String iconurl;
+    private String familiar;
+    private String familiarChina;
+    private String areaPro;
+    private String subTool;
+    private String isDS;
+    private int isPro;
+    private String superDes;
+    private String registerTime;
+    private String password;
+    private String openId;
+    private String nickName;
+    private String avatarUrl;
+    private String gender;
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    private String country;
+    private String province;
+    private String city;
+    private String score;
+    private String finishPer;
+    private String custom;
+
+    private String bzj;
+    private String cjs;
+    private String cje;
 
     public int getRow_id() {
         return row_id;
@@ -141,6 +165,38 @@ public class FramePeople {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public void setPassword(String password) {

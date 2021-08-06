@@ -22,8 +22,8 @@ public class FramePeopleImpl implements IframePeople {
         int flag=0;
         Connection conn = JdbcUtils.getConn();
         //SQL语句
-        String sql = "INSERT INTO Frame_People(rowGuid,phone,usertype,dealNum,dealMoney,iconurl,familiar,areaPro,subTool,isDS,isPro,superDes,registerTime,password,FamiliarChina,openId)" +
-                " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
+        String sql = "INSERT INTO Frame_People(rowGuid,phone,usertype,dealNum,dealMoney,iconurl,familiar,areaPro,subTool,isDS,isPro,superDes,registerTime,password,FamiliarChina,openId,userFlag)" +
+                " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             preparedStatement.setString(1,record.getRowGuid());
@@ -42,6 +42,7 @@ public class FramePeopleImpl implements IframePeople {
             preparedStatement.setString(14,record.getPassword());
             preparedStatement.setString(15,record.getFamiliarChina());
             preparedStatement.setString(16,record.getOpenId());
+            preparedStatement.setInt(17,record.getUserFlag());
             //执行语句，得到结果集
             preparedStatement.execute();
             flag=1;
@@ -62,7 +63,7 @@ public class FramePeopleImpl implements IframePeople {
         int flag=0;
         Connection conn = JdbcUtils.getConn();
         //SQL语句
-        String sql = "update Frame_People set phone=?,usertype=?,dealNum=?,dealMoney=?,iconurl=?,familiar=?,areaPro=?,subTool=?,isDS=?,isPro=?,superDes=?,password=?,familiarChina=?,openId=?,nickName=? where rowguid=?";
+        String sql = "update Frame_People set phone=?,usertype=?,dealNum=?,dealMoney=?,iconurl=?,familiar=?,areaPro=?,subTool=?,isDS=?,isPro=?,superDes=?,password=?,familiarChina=?,openId=?,nickName=?,avatarUrl=?,gender=?,country=?,province=?,city=?,userFlag=? where rowguid=?";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             preparedStatement.setString(1,record.getPhone());
@@ -80,7 +81,13 @@ public class FramePeopleImpl implements IframePeople {
             preparedStatement.setString(13,record.getFamiliarChina());
             preparedStatement.setString(14,record.getOpenId());
             preparedStatement.setString(15,record.getNickName());
-            preparedStatement.setString(16,record.getRowGuid());
+            preparedStatement.setString(16,record.getAvatarUrl());
+            preparedStatement.setString(17,record.getGender());
+            preparedStatement.setString(18,record.getCountry());
+            preparedStatement.setString(19,record.getProvince());
+            preparedStatement.setString(20,record.getCity());
+            preparedStatement.setInt(21,record.getUserFlag());
+            preparedStatement.setString(22,record.getRowGuid());
             //执行语句，得到结果集
             preparedStatement.execute();
             flag=1;
@@ -148,7 +155,12 @@ public class FramePeopleImpl implements IframePeople {
                 record.setRegisterTime(resultSet.getString("registerTime"));
               /*  record.setFamiliarChina(resultSet.getString("familiarChina"));*/
                 record.setOpenId(resultSet.getString("openId"));
-                record.setNickName(resultSet.getString("NickName"));
+                record.setNickName(resultSet.getString("nickName"));
+                record.setGender(resultSet.getString("gender"));
+                record.setAvatarUrl(resultSet.getString("avatarUrl"));
+                record.setCountry(resultSet.getString("country"));
+                record.setProvince(resultSet.getString("province"));
+                record.setCity(resultSet.getString("city"));
              /*   record.setScore(resultSet.getString("Score"));*/
     /*            record.setFinishPer(resultSet.getString("finishPer"));*/
                 record.setCustom(resultSet.getString("custom"));
@@ -277,7 +289,7 @@ public class FramePeopleImpl implements IframePeople {
                 record.setSuperDes(resultSet.getString("superDes"));
                 record.setRegisterTime(resultSet.getString("registerTime"));
                 record.setOpenId(resultSet.getString("openId"));
-                record.setNickName(resultSet.getString("NickName"));
+                record.setNickName(resultSet.getString("nickName"));
        /*         record.setScore(resultSet.getString("Score"));
                 record.setFinishPer(resultSet.getString("finishPer"));*/
                 record.setCustom(resultSet.getString("custom"));

@@ -51,6 +51,50 @@ public class PeoplesController {
     /*
      * 更新用户信息
      */
+    @RequestMapping(value = "/newUpdateUserInfo", method = RequestMethod.POST)
+    public String newUpdateUserInfo(@RequestBody String params) {
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        try {
+            String userguid = jsonObject.get("userguid")!=null?jsonObject.get("userguid").toString():"";
+            //新加字段
+            String nickName = jsonObject.get("nickName")!=null?jsonObject.get("nickName").toString():"";
+            String avatarUrl = jsonObject.get("avatarUrl")!=null?jsonObject.get("avatarUrl").toString():"";
+            String province = jsonObject.get("province")!=null?jsonObject.get("province").toString():"";
+            String country = jsonObject.get("country")!=null?jsonObject.get("country").toString():"";
+            String city = jsonObject.get("city")!=null?jsonObject.get("city").toString():"";
+            String gender = jsonObject.get("gender")!=null?jsonObject.get("gender").toString():"";
+            FramePeople record = new FramePeople();
+            record = iframePeople.findPeople("rowguid", userguid);
+            if (record == null) {
+                rJsonObject.put("code", "300");
+                rJsonObject.put("error","没查到该条数据");
+                return rJsonObject.toJSONString();
+            }
+            record.setRowGuid(userguid);
+            record.setNickName(nickName);
+            record.setProvince(province);
+            record.setCountry(country);
+            record.setCity(city);
+            record.setGender(gender);
+            record.setAvatarUrl(avatarUrl);
+            int n = iframePeople.update(record);
+            if (n == 0) {
+                rJsonObject.put("code", "400");
+            } else {
+                rJsonObject.put("code", "200");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    /*
+     * 更新用户信息
+     */
     @RequestMapping(value = "/updateUserInfo", method = RequestMethod.POST)
     public String updateUserInfo(@RequestBody String params)  {
         JSONObject rJsonObject = new JSONObject();
@@ -61,14 +105,14 @@ public class PeoplesController {
         //String passwd = MD5Utils.stringToMD5(jsonObject.get("passWord").toString());
         String usertype = jsonObject.get("usertype").toString();
         String iconurl = jsonObject.get("iconurl").toString();
-       // String familiar = jsonObject.get("familiar").toString();
+        // String familiar = jsonObject.get("familiar").toString();
         //String familiarChina = jsonObject.get("familiarChina").toString();
         String areaPro = jsonObject.get("areaPro").toString();
         //String subTool = jsonObject.get("subTool").toString();
         String isDS = jsonObject.get("isDS").toString();
         String isPro = jsonObject.get("isPro").toString();
         String superDes = jsonObject.get("superDes").toString();
-         //新加字段
+        //新加字段
         String nickName = jsonObject.get("nickName").toString();
         //String openid = jsonObject.get("openid").toString();
         try {
@@ -79,21 +123,21 @@ public class PeoplesController {
                 return  rJsonObject.toJSONString();
             }
             record.setRowGuid(userguid);
-           // record.setPhone(phone);
-           // record.setPassword(passwd);
+            // record.setPhone(phone);
+            // record.setPassword(passwd);
             record.setUsertype(usertype);
             //record.setDealNum(Integer.parseInt(dealNum));
             //record.setDealMoney(Double.valueOf(dealMoney));
             record.setIconurl(iconurl);
-           // record.setFamiliar(familiar);
-         //   record.setFamiliarChina(familiarChina);
+            // record.setFamiliar(familiar);
+            //   record.setFamiliarChina(familiarChina);
             record.setAreaPro(areaPro);
-          //  record.setSubTool(subTool);
+            //  record.setSubTool(subTool);
             record.setIsDS(isDS);
             record.setIsPro(Integer.parseInt(isPro));
             record.setSuperDes(superDes);
             record.setNickName(nickName);
-           // record.setOpenId(openid);
+            // record.setOpenId(openid);
             int n = iframePeople.update(record);
             switch (usertype) {
                 case "01"://个人扩展信息
@@ -128,7 +172,7 @@ public class PeoplesController {
                     String comanyQualify = jsonObject.get("comanyQualify").toString();
                     FrameCompanyExtendinfo companyExtendinfo = null;
                     //获取用户扩展信息
-                     map = new HashMap<>();
+                    map = new HashMap<>();
                     map.put("userguid", userguid);
                     companyExtendinfo = iframeCompanyExtendinfo.find(map);
                     if (companyExtendinfo == null) {//不存在，插入
@@ -171,7 +215,7 @@ public class PeoplesController {
      * 更新用户信息
      */
     @RequestMapping(value = "/updatesimpUserInfo", method = RequestMethod.POST)
-    public String updatesimpUserInfo(@RequestBody String params)  {
+    public String updatesimpUserInfo(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
@@ -186,10 +230,10 @@ public class PeoplesController {
         String nickName = jsonObject.get("nickName").toString();
         try {
             FramePeople record = new FramePeople();
-            record=iframePeople.findPeople("rowguid",userguid);
-            if(record ==null){
+            record = iframePeople.findPeople("rowguid", userguid);
+            if (record == null) {
                 rJsonObject.put("code", "300");
-                return  rJsonObject.toJSONString();
+                return rJsonObject.toJSONString();
             }
             record.setRowGuid(userguid);
 
@@ -214,6 +258,7 @@ public class PeoplesController {
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 获取商铺信息
      */
@@ -225,15 +270,15 @@ public class PeoplesController {
         String rowGuid = jsonObject.get("userguid").toString();
         try {
             FramePeople record = iframePeople.findPeople("rowguid", rowGuid);
-            Map<String,Object> map=new HashMap<>();
-            map.put("userGuid",rowGuid);
-            switch (record.getUsertype()){
+            Map<String, Object> map = new HashMap<>();
+            map.put("userGuid", rowGuid);
+            switch (record.getUsertype()) {
                 case "01":
-           FramePeopleExtendinfo  FramePeopleExtendinfo = iframePeopleExtend.find(map);
+                    FramePeopleExtendinfo FramePeopleExtendinfo = iframePeopleExtend.find(map);
                     rJsonObject.put("extend", FramePeopleExtendinfo);
                     break;
                 default:
-            FrameCompanyExtendinfo frameCompanyExtendinfo= iframeCompanyExtendinfo.find(map);
+                    FrameCompanyExtendinfo frameCompanyExtendinfo = iframeCompanyExtendinfo.find(map);
                     rJsonObject.put("extend", frameCompanyExtendinfo);
                     break;
             }
@@ -241,10 +286,10 @@ public class PeoplesController {
             record.setBzj("0"); //保证金
             record.setDealNum(0); //成交数
             record.setDealMoney(0); //成交额
-            if(record.getFinishPer()==null){
+            if (record.getFinishPer() == null) {
                 record.setFinishPer("100%");
             }
-            if(record.getCustom()==null){
+            if (record.getCustom() == null) {
                 record.setCustom("0");
             }
             rJsonObject.put("code", "200");
@@ -278,7 +323,7 @@ public class PeoplesController {
      * 登录
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String login(@RequestBody String params)  {
+    public String login(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
@@ -305,7 +350,7 @@ public class PeoplesController {
      * 登录
      */
     @RequestMapping(value = "/codelogin", method = RequestMethod.POST)
-    public String codelogin(@RequestBody String params)  {
+    public String codelogin(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
@@ -319,12 +364,10 @@ public class PeoplesController {
             Map<String, Object> map = new HashMap<>();
             map.put("phone", phone);
             FramePeople framePeople = iframePeople.find(map);//用户是否存在
-            if (framePeople == null)
-            {
+            if (framePeople == null) {
                 System.out.println("失败");
                 rJsonObject.put("code", "400");
-            }
-            else {
+            } else {
                 rJsonObject.put("code", "200");
                 rJsonObject.put("result", framePeople);//存在则返回用户信息
             }
@@ -339,7 +382,7 @@ public class PeoplesController {
      * 新增感兴趣
      */
     @RequestMapping(value = "/addEnjoy", method = RequestMethod.POST)
-    public String addEnjoy(@RequestBody String params)  {
+    public String addEnjoy(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
@@ -353,22 +396,22 @@ public class PeoplesController {
         String[] arrchina = enjoyTypeChina.split(";");
         FramePeopleEnjoy framePeopleEnjoy;
         try {
-            Map<String,Object> map=new HashMap<>();
-            map.put("rowguid",userguid);
-           FramePeople framePeople= iframePeople.find(map);
-           if(framePeople==null){
-               rJsonObject.put("code", "300");//插入失败
-               return rJsonObject.toJSONString();
-           }
+            Map<String, Object> map = new HashMap<>();
+            map.put("rowguid", userguid);
+            FramePeople framePeople = iframePeople.find(map);
+            if (framePeople == null) {
+                rJsonObject.put("code", "300");//插入失败
+                return rJsonObject.toJSONString();
+            }
             iframePeople.deleteEnjoy(userguid);
-            for(int i=0;i<arr.length;i++){
+            for (int i = 0; i < arr.length; i++) {
                 framePeopleEnjoy = new FramePeopleEnjoy();
                 framePeopleEnjoy.setRowGuid(rowGuid);
                 framePeopleEnjoy.setEnjoyType(arr[i]);
                 framePeopleEnjoy.setUserGuid(userguid);
                 framePeopleEnjoy.setEnjoyTypeChina(arrchina[i]);
                 iframePeople.insertEnjoy(framePeopleEnjoy);
-           }
+            }
             rJsonObject.put("code", "200");//插入失败
         } catch (Exception e) {
             //插入报错信息
@@ -461,18 +504,18 @@ public class PeoplesController {
         String area = jsonObject.get("area").toString();
         FramepeopleGoodat record;
         try {
-            Map<String,Object> map=new HashMap<>();
-            map.put("rowguid",userguid);
-            FramePeople framePeople= iframePeople.find(map);
-            if(framePeople==null){
+            Map<String, Object> map = new HashMap<>();
+            map.put("rowguid", userguid);
+            FramePeople framePeople = iframePeople.find(map);
+            if (framePeople == null) {
                 rJsonObject.put("code", "300");//商家信息不存在
                 return rJsonObject.toJSONString();
             }
-            Map<String,Object> maptype=new HashMap<>();
-            maptype.put("userguid",userguid);
-            maptype.put("goodAt",goodAt);
-            FramepeopleGoodat framepeopleGoodat=iframePeopleGoodAt.find(maptype);
-            if(framepeopleGoodat!=null){
+            Map<String, Object> maptype = new HashMap<>();
+            maptype.put("userguid", userguid);
+            maptype.put("goodAt", goodAt);
+            FramepeopleGoodat framepeopleGoodat = iframePeopleGoodAt.find(maptype);
+            if (framepeopleGoodat != null) {
                 rJsonObject.put("code", "500");//服务种类已存在
                 return rJsonObject.toJSONString();
             }
@@ -526,17 +569,17 @@ public class PeoplesController {
         String isSJ = jsonObject.get("isSJ").toString();
         String area = jsonObject.get("area").toString();
         try {
-            Map<String,Object> map=new HashMap<>();
-            map.put("rowguid",userguid);
-            FramePeople framePeople= iframePeople.find(map);
-            if(framePeople==null){
+            Map<String, Object> map = new HashMap<>();
+            map.put("rowguid", userguid);
+            FramePeople framePeople = iframePeople.find(map);
+            if (framePeople == null) {
                 rJsonObject.put("code", "300");//商家信息不存在
                 return rJsonObject.toJSONString();
             }
-            Map<String,Object> maptype=new HashMap<>();
-            maptype.put("rowGuid",rowGuid);
-            FramepeopleGoodat framepeopleGoodat=iframePeopleGoodAt.find(maptype);
-            if(framepeopleGoodat==null){
+            Map<String, Object> maptype = new HashMap<>();
+            maptype.put("rowGuid", rowGuid);
+            FramepeopleGoodat framepeopleGoodat = iframePeopleGoodAt.find(maptype);
+            if (framepeopleGoodat == null) {
                 rJsonObject.put("code", "400");
                 return rJsonObject.toJSONString();
             }
@@ -563,11 +606,12 @@ public class PeoplesController {
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 删除服务商品
      */
     @RequestMapping(value = "/delGoodAt", method = RequestMethod.POST)
-    public String delGoodAt(@RequestBody String params)  {
+    public String delGoodAt(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
@@ -575,7 +619,7 @@ public class PeoplesController {
         String datatime = sDateFormat.format(new Date());
         String rowGuid = jsonObject.get("rowGuid").toString();
         try {
-            FramepeopleGoodat goodat=new FramepeopleGoodat();
+            FramepeopleGoodat goodat = new FramepeopleGoodat();
             goodat.setRowGuid(rowGuid);
             iframePeopleGoodAt.delete(goodat);
             rJsonObject.put("code", "200");//
@@ -590,6 +634,7 @@ public class PeoplesController {
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 获取商家服务
      */
@@ -605,36 +650,36 @@ public class PeoplesController {
         String userguid = jsonObject.get("userguid").toString();//商家标识
         int pagesize = Integer.parseInt(jsonObject.get("pagesize").toString());
         int pagenum = Integer.parseInt(jsonObject.get("pagenum").toString());
-        String rowGuid="";
-        String CliengGuid="";
+        String rowGuid = "";
+        String CliengGuid = "";
         try {
             List<HashMap<String, Object>> listattach;
-            Map<String, Object> attachmap ;
+            Map<String, Object> attachmap;
             Map<String, Object> map = new HashMap<>();
             map.put("userguid=", userguid);
-             List<HashMap<String, Object>> newlist=new ArrayList<>();
+            List<HashMap<String, Object>> newlist = new ArrayList<>();
             List<HashMap<String, Object>> list = inewcommon.findlist("frame_people_goodat", "*", map, "", "", pagenum, pagesize);
-            int count=inewcommon.findlist("frame_people_goodat",map,"");
-            for(HashMap<String, Object> hashMap:list){
-               rowGuid=hashMap.get("rowGuid").toString();
-               hashMap.put("isSJ",hashMap.get("isSJ").toString().equals("true")?true:false);
-               if(hashMap.get("addtime")!=null){
-                  hashMap.put("addtime",simpleDateFormat.format(simpleDateFormat.parse(hashMap.get("addtime").toString())));
-               }else{
-                   hashMap.put("addtime","");
-               }
-               hashMap.put("salenum","0");//销售量
-                CliengGuid =hashMap.get("productIcon").toString();
-              attachmap=new HashMap<>();
-              attachmap.put("clientGuid=",CliengGuid);
-              listattach = inewcommon.findlist("frame_attachinfo", "*", attachmap, "", "", 0, 20);
-              if(listattach.size()>0){
-                  hashMap.put("filepath",listattach.get(0).get("filepath"));
-              }else{
-                  hashMap.put("filepath","../../../../images/other/touxiang_3.png");
-              }
+            int count = inewcommon.findlist("frame_people_goodat", map, "");
+            for (HashMap<String, Object> hashMap : list) {
+                rowGuid = hashMap.get("rowGuid").toString();
+                hashMap.put("isSJ", hashMap.get("isSJ").toString().equals("true") ? true : false);
+                if (hashMap.get("addtime") != null) {
+                    hashMap.put("addtime", simpleDateFormat.format(simpleDateFormat.parse(hashMap.get("addtime").toString())));
+                } else {
+                    hashMap.put("addtime", "");
+                }
+                hashMap.put("salenum", "0");//销售量
+                CliengGuid = hashMap.get("productIcon").toString();
+                attachmap = new HashMap<>();
+                attachmap.put("clientGuid=", CliengGuid);
+                listattach = inewcommon.findlist("frame_attachinfo", "*", attachmap, "", "", 0, 20);
+                if (listattach.size() > 0) {
+                    hashMap.put("filepath", listattach.get(0).get("filepath"));
+                } else {
+                    hashMap.put("filepath", "../../../../images/other/touxiang_3.png");
+                }
                 newlist.add(hashMap);
-           }
+            }
             rJsonObject.put("code", "200");
             rJsonObject.put("count", count);
             rJsonObject.put("result", newlist);
@@ -663,19 +708,19 @@ public class PeoplesController {
         String datatime = sDateFormat.format(new Date());
         String rowGuid = jsonObject.get("rowGuid").toString();
         try {
-            FramepeopleGoodat goodat=new FramepeopleGoodat();
+            FramepeopleGoodat goodat = new FramepeopleGoodat();
             Map<String, Object> map = new HashMap<>();
             map.put("rowGuid", rowGuid);
-            goodat=iframePeopleGoodAt.find(map);
+            goodat = iframePeopleGoodAt.find(map);
             //获取商品销售个数
-            String conditionnew = " and productguid='"+rowGuid+"'";
-            int productcount= inewcommon.findlist("smart_project",null,conditionnew);
+            String conditionnew = " and productguid='" + rowGuid + "'";
+            int productcount = inewcommon.findlist("smart_project", null, conditionnew);
             map.put("dealcount", productcount);
             //获取商品销售金额
-            conditionnew = " and  productguid='"+rowGuid+"' ";
-            List<HashMap<String, Object>> newlist = inewcommon.findlist("smart_project"," sum(PROJECT_AMT) as PROJECT_AMT,productguid ",null,conditionnew,"",0,10);
-            String dealmoney= newlist.get(0).get("PROJECT_AMT")==null?"0":newlist.get(0).get("PROJECT_AMT").toString();
-            map.put("dealmoney",dealmoney);
+            conditionnew = " and  productguid='" + rowGuid + "' ";
+            List<HashMap<String, Object>> newlist = inewcommon.findlist("smart_project", " sum(PROJECT_AMT) as PROJECT_AMT,productguid ", null, conditionnew, "", 0, 10);
+            String dealmoney = newlist.get(0).get("PROJECT_AMT") == null ? "0" : newlist.get(0).get("PROJECT_AMT").toString();
+            map.put("dealmoney", dealmoney);
 
             rJsonObject.put("code", "200");
             rJsonObject.put("result", goodat);
@@ -691,6 +736,7 @@ public class PeoplesController {
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 判断验证码是否正确
      */

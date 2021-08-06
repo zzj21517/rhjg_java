@@ -440,6 +440,7 @@ public class RegisterController {
         String code = jsonObject.get("code").toString();
         String encryptedData = jsonObject.get("encryptedData").toString();
         String iv = jsonObject.get("iv").toString();
+        int userFlag=Integer.parseInt(jsonObject.get("userFlag").toString());
         try {
             PropertiesUtil.loadFile("encode.properties");
             String appid = PropertiesUtil.getPropertyValue("appid");
@@ -449,38 +450,49 @@ public class RegisterController {
             com.alibaba.fastjson.JSONObject jo = com.alibaba.fastjson.JSONObject.parseObject(oauthResponseText);
 //               && phoneNumber !=null
             if (jo.get("openid") != null && !"".equals(jo.get("openid"))) {
-                rJsonObject.put("openid", jo.get("openid").toString());
                 //    获取手机号
                 String session_key = jo.get("session_key").toString();
                 JSONObject phoneInfo = WechatDecryptDataUtil.getPhoneNumber(session_key, encryptedData, iv);
                 System.out.println(phoneInfo.toString());
                 String phoneNumber = phoneInfo.get("phoneNumber").toString();
                 System.out.println(phoneNumber);
-                rJsonObject.put("phoneNumber", phoneNumber);
 //                    插入用户
                 FramePeople record = null;
                 record = iframePeople.findPeople("phone", phoneNumber);
-                if (record == null) {//初始化用户registerUser
+                int n=0;
+                if (record == null) {
+                    SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String registerTime = sDateFormat.format(new Date());
                     FramePeople people = new FramePeople();
+                    people.setRowGuid(UUID.randomUUID().toString());
+                    people.setRegisterTime(registerTime);
                     people.setPhone(phoneNumber);
                     people.setOpenId(jo.get("openid").toString());
-                    iframePeople.insert(people);
+                    people.setUserFlag(userFlag);
                     record = people;
+                    n = iframePeople.insert(record);
                 } else if (record.getOpenId() == null) {
                     record.setOpenId(jo.get("openid").toString());
+                    n=iframePeople.update(record);
+                }else{
+                    n=1;
                 }
-                int n = iframePeople.insert(record);
                 if (n == 0) {
                     rJsonObject.put("code", "400");
                     rJsonObject.put("error", "登录失败!");
                 } else {
+                    rJsonObject.put("openid", record.getOpenId());
+                    rJsonObject.put("phoneNumber", record.getPhone());
+                    rJsonObject.put("userguid",record.getRowGuid());
+                    rJsonObject.put("userFlag",record.getUserFlag());
                     rJsonObject.put("code", "200");
                 }
             } else {
                 rJsonObject.put("code", "400");
                 rJsonObject.put("msg", jo.get("errmsg").toString());
             }
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             rJsonObject.put("code", "400");
         }
 
