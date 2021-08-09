@@ -2,8 +2,9 @@ package com.lxh.newrhjg.rest;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lxh.contract.api.IContract;
+import com.lxh.newrhjg.api.IframeProject;
 import com.lxh.newrhjg.api.Inewcommon;
-import com.lxh.newrhjg.entity.FramepeopleGoodat;
+import com.lxh.newrhjg.entity.FrameMenu;
 import com.lxh.rhjg.active.api.*;
 import com.lxh.rhjg.circle.api.ICircle;
 import com.lxh.rhjg.circle.api.SMART_PHOTO;
@@ -41,9 +42,24 @@ public class ProjectController {
     Icommon icommon;
     @Autowired
     Inewcommon inewcommon;
+    @Autowired
+    IframeProject iframeProject;
     /*
      * 首页数据
      */
+    @RequestMapping(value = "/GetMenuList", method = RequestMethod.POST)
+    public String GetMenuList(@RequestBody String params) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try{
+            List<FrameMenu> list =iframeProject.findMenuList();
+            rJsonObject.put("code", "200");
+            rJsonObject.put("list", list);
+        }catch (Exception err){
+            System.out.println(err);
+        }
+        return rJsonObject.toJSONString();
+    }
+
     @RequestMapping(value = "/GetBanner", method = RequestMethod.POST)
     public String GetBanner(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();

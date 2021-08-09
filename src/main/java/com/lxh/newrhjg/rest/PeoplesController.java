@@ -83,6 +83,7 @@ public class PeoplesController {
             if (n == 0) {
                 rJsonObject.put("code", "400");
             } else {
+                rJsonObject.put("userInfo",record);
                 rJsonObject.put("code", "200");
             }
         } catch (Exception e) {

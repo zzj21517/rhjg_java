@@ -437,10 +437,10 @@ public class RegisterController {
         // 错误信息
         String errorMsg = "";
         // 解析参数
-        String code = jsonObject.get("code").toString();
-        String encryptedData = jsonObject.get("encryptedData").toString();
-        String iv = jsonObject.get("iv").toString();
-        int userFlag=Integer.parseInt(jsonObject.get("userFlag").toString());
+        String code = jsonObject.get("code")!=null?jsonObject.get("code").toString():"";
+        String encryptedData = jsonObject.get("encryptedData")!=null?jsonObject.get("encryptedData").toString():"";
+        String iv = jsonObject.get("iv")!=null?jsonObject.get("iv").toString():"";
+        int userFlag=jsonObject.get("userFlag")!=null?Integer.parseInt(jsonObject.get("userFlag").toString()):1;
         try {
             PropertiesUtil.loadFile("encode.properties");
             String appid = PropertiesUtil.getPropertyValue("appid");
@@ -481,10 +481,7 @@ public class RegisterController {
                     rJsonObject.put("code", "400");
                     rJsonObject.put("error", "登录失败!");
                 } else {
-                    rJsonObject.put("openid", record.getOpenId());
-                    rJsonObject.put("phoneNumber", record.getPhone());
-                    rJsonObject.put("userguid",record.getRowGuid());
-                    rJsonObject.put("userFlag",record.getUserFlag());
+                    rJsonObject.put("userInfo", record);
                     rJsonObject.put("code", "200");
                 }
             } else {
