@@ -5,6 +5,7 @@ import com.lxh.contract.api.IContract;
 import com.lxh.newrhjg.api.IframeProject;
 import com.lxh.newrhjg.api.Inewcommon;
 import com.lxh.newrhjg.entity.FrameMenu;
+import com.lxh.newrhjg.entity.FrameMember;
 import com.lxh.rhjg.active.api.*;
 import com.lxh.rhjg.circle.api.ICircle;
 import com.lxh.rhjg.circle.api.SMART_PHOTO;
@@ -47,6 +48,18 @@ public class ProjectController {
     /*
      * 首页数据
      */
+    @RequestMapping(value = "/GetMemberList", method = RequestMethod.POST)
+    public String GetMemberList(@RequestBody String params) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try{
+            List<FrameMember> list =iframeProject.findMemberList();
+            rJsonObject.put("code", "200");
+            rJsonObject.put("list", list);
+        }catch (Exception err){
+            System.out.println(err);
+        }
+        return rJsonObject.toJSONString();
+    }
     @RequestMapping(value = "/GetMenuList", method = RequestMethod.POST)
     public String GetMenuList(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();

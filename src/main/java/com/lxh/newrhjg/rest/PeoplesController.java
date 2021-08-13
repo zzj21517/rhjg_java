@@ -47,6 +47,51 @@ public class PeoplesController {
     IframePeopleGoodAt iframePeopleGoodAt;
     @Autowired
     IframeCompanyExtendinfo iframeCompanyExtendinfo;
+    @Autowired
+    IframeProject iframeProject;
+    /*
+     * 客户需求登记
+     */
+    @RequestMapping(value = "/codeApply", method = RequestMethod.POST)
+    public String codeApply(@RequestBody String params) {
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        int pid=Integer.parseInt(jsonObject.get("pid").toString());
+        int cid=Integer.parseInt(jsonObject.get("cid").toString());
+        String userName=jsonObject.get("userName").toString();
+        String phone = jsonObject.get("phone").toString();
+        String verifyCode = jsonObject.get("verifyCode").toString();
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateTime = sDateFormat.format(new Date());
+        try {
+            if (!IsVerifyCode(phone, verifyCode)) {
+                rJsonObject.put("code", "300");//验证码不正确
+                rJsonObject.put("error", "验证码错误");
+                return rJsonObject.toJSONString();
+            }
+            FrameApply frameApply=new FrameApply();
+            frameApply.setUserName(userName);
+            frameApply.setPhone(phone);
+            frameApply.setPid(pid);
+            frameApply.setCid(cid);
+            frameApply.setCreateTime(dateTime);
+            int n=iframeProject.insertApply(frameApply);
+            if (n==0) {
+                System.out.println("提交失败");
+                rJsonObject.put("code", "400");
+                rJsonObject.put("error","提交失败");
+            } else {
+                rJsonObject.put("code", "200");
+                rJsonObject.put("msg","提交成功");
+                rJsonObject.put("result", frameApply);//存在则返回用户信息
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
 
     /*
      * 更新用户信息
@@ -325,6 +370,7 @@ public class PeoplesController {
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(@RequestBody String params) {
+        System.out.println("登錄");
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));

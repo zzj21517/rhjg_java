@@ -22,7 +22,7 @@ public class TradeImpl implements ITrade {
     public void insertTrade(SMART_TRADE smartTrade) {
         Connection conn = JdbcUtils.getConn();
         //SQL语句
-        String sql = "INSERT INTO SMART_TIP(GUID,TRADE_NUM,TRADE_AMT,CONTENT,STATUS,USER_ID,ITEM_TYPE,DATATIME,PROJECT_NUM)" +
+        String sql = "INSERT INTO SMART_TRADE(GUID,TRADE_NUM,TRADE_AMT,CONTENT,STATUS,USER_ID,ITEM_TYPE,DATATIME,PROJECT_NUM)" +
                 " VALUES(?,?,?,?,?,?,?,?,?) ";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);

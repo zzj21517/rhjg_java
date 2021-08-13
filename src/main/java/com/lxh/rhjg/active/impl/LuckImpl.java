@@ -79,6 +79,8 @@ public class LuckImpl implements ILuck {
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             preparedStatement.setString(1,smartTrade.getGUID());
+            System.out.println(smartTrade.getTRADE_NUM());
+            System.out.println(121);
             preparedStatement.setString(2,smartTrade.getTRADE_NUM());
             preparedStatement.setString(3,smartTrade.getTRADE_AMT());
             preparedStatement.setString(4,smartTrade.getCONTENT());
