@@ -11,7 +11,7 @@ import java.util.Map;
 
 public  interface ISubscribe extends Serializable {
     public void insertSubscribe(SMART_SUBSCRIBE subscribe);
-    public void insertsignday(SMART_SIGNDAY smartSignday);
+    public int insertsignday(SMART_SIGNDAY smartSignday);
     public  List<HashMap<String,Object>> getLastSign(String condition);
     public  List<HashMap<String,Object>> getCard(String condition);
 }

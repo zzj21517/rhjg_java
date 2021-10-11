@@ -11,13 +11,11 @@ import com.lxh.rhjg.common.util.Common;
 import com.lxh.rhjg.common.util.HttpClient;
 import com.lxh.rhjg.common.util.MD5Utils;
 import com.lxh.rhjg.entity.*;
+import com.lxh.rhjg.subscribe.api.ISubscribe;
 import com.lxh.rhjg.verifycode.api.IVerifycode;
 import com.lxh.test.common.PropertiesUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -39,6 +37,8 @@ public class RegisterController {
     Icommon icommon;
     @Autowired
     IframePeopleExtend iframePeopleExtend;
+    @Autowired
+    ISubscribe iSubscribe;
 
     /*
      * 注册商家用户
@@ -428,6 +428,31 @@ public class RegisterController {
         return rJsonObject.toJSONString();
     }
 
+    //微信小程序获取用户信息
+    @RequestMapping(value = "/getUserInfo", method = RequestMethod.POST)
+    public String getUserInfo(@RequestBody String params, @RequestHeader("openId") String openId) {
+        JSONObject rJsonObject = new JSONObject();
+        if (openId == null) {
+            rJsonObject.put("code", "4000");
+            return rJsonObject.toJSONString();
+        }
+        try {
+            FramePeople record = null;
+            record = iframePeople.findPeople("openid", openId);
+            if (record != null) {
+                rJsonObject.put("code", "200");
+                rJsonObject.put("userInfo",record);
+            }else{
+                rJsonObject.put("code","500");
+            }
+
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
+        }
+
+        return rJsonObject.toJSONString();
+    }
+
     //微信小程序手机号一键登录
     @RequestMapping(value = "/wxlogin", method = RequestMethod.POST)
     public String wxLogin(@RequestBody String params) {
@@ -437,10 +462,12 @@ public class RegisterController {
         // 错误信息
         String errorMsg = "";
         // 解析参数
-        String code = jsonObject.get("code")!=null?jsonObject.get("code").toString():"";
-        String encryptedData = jsonObject.get("encryptedData")!=null?jsonObject.get("encryptedData").toString():"";
-        String iv = jsonObject.get("iv")!=null?jsonObject.get("iv").toString():"";
-        int userFlag=jsonObject.get("userFlag")!=null?Integer.parseInt(jsonObject.get("userFlag").toString()):1;
+        String parentId=jsonObject.get("parentId")!=null?jsonObject.getString("parentId"):"";
+        String code = jsonObject.get("code") != null ? jsonObject.get("code").toString() : "";
+        String encryptedData = jsonObject.get("encryptedData") != null ? jsonObject.get("encryptedData").toString() : "";
+        String iv = jsonObject.get("iv") != null ? jsonObject.get("iv").toString() : "";
+        int userFlag = jsonObject.get("userFlag") != null ? Integer.parseInt(jsonObject.get("userFlag").toString()) : 1;
+        int engineerType=jsonObject.get("engineerType") != null ? Integer.parseInt(jsonObject.get("engineerType").toString()) : 0;
         try {
             PropertiesUtil.loadFile("encode.properties");
             String appid = PropertiesUtil.getPropertyValue("appid");
@@ -459,7 +486,7 @@ public class RegisterController {
 //                    插入用户
                 FramePeople record = null;
                 record = iframePeople.findPeople("phone", phoneNumber);
-                int n=0;
+                int n = 0;
                 if (record == null) {
                     SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String registerTime = sDateFormat.format(new Date());
@@ -469,27 +496,64 @@ public class RegisterController {
                     people.setPhone(phoneNumber);
                     people.setOpenId(jo.get("openid").toString());
                     people.setUserFlag(userFlag);
+                    people.setEngineerType(engineerType);
+                    people.setLevel(0);
+                    people.setReward(0.00);
+                    people.setParentGuid(parentId);
                     record = people;
+                    System.out.println(record);
                     n = iframePeople.insert(record);
+                    FramePeople parentRecord=null;
+                    int n1=0;
+                    if(parentId!=""){
+                        parentRecord=iframePeople.findPeople("rowguid",parentId);
+                        int parentUserFlag=parentRecord.getUserFlag();
+                        if(parentUserFlag==1){
+                            parentRecord.setCustomShareNewUserCouponCount(parentRecord.getCustomShareNewUserCouponCount()+1);
+                        }else{
+                            parentRecord.setEngineerShareNewUserCouponCount(parentRecord.getEngineerShareNewUserCouponCount()+1);
+//                        工程师邀请注册获得20积分
+                            parentRecord.setEngineerIntegralAmount(parentRecord.getEngineerIntegralAmount()+20);
+                            record.setEngineerIntegralAmount(record.getEngineerIntegralAmount()+30);
+                            SMART_SIGNDAY signDay = new SMART_SIGNDAY();
+                            signDay.setGUID(UUID.randomUUID().toString());
+                            signDay.setUSER_ID(parentRecord.getRowGuid());
+                            String dateTime = sDateFormat.format(new Date());
+                            signDay.setDATATIME(dateTime);
+                            signDay.setINTEGRALCHANGE(20);
+                            signDay.setINTEGRALTYPE(2);
+                            int n4=iSubscribe.insertsignday(signDay);
+                            if(n4==0){
+                                rJsonObject.put("code", "500");
+                                return rJsonObject.toJSONString();
+                            }
+                        }
+                        n1=iframePeople.update(parentRecord);
+                        if (n1 == 0) {
+                            rJsonObject.put("code", "500");
+                            rJsonObject.put("error", "登录失败!");
+                            return rJsonObject.toJSONString();
+                        }
+                    }
                 } else if (record.getOpenId() == null) {
                     record.setOpenId(jo.get("openid").toString());
-                    n=iframePeople.update(record);
-                }else{
-                    n=1;
+                    n = iframePeople.update(record);
+                } else {
+                    n = 1;
                 }
                 if (n == 0) {
-                    rJsonObject.put("code", "400");
+                    rJsonObject.put("code", "500");
                     rJsonObject.put("error", "登录失败!");
                 } else {
                     rJsonObject.put("userInfo", record);
                     rJsonObject.put("code", "200");
                 }
             } else {
-                rJsonObject.put("code", "400");
+                rJsonObject.put("code", "500");
                 rJsonObject.put("msg", jo.get("errmsg").toString());
             }
-        } catch (
-                Exception e) {
+        } catch ( Exception e) {
+            System.out.println(e);
             rJsonObject.put("code", "400");
         }
 

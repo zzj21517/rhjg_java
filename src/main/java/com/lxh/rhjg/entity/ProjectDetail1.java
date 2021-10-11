@@ -2,10 +2,29 @@ package com.lxh.rhjg.entity;
 
 public class ProjectDetail1 {
     private  String PROJECT_NUM;
+    private String ENGINEER_AMT;
+    private  String CUST_ID;
     private  String LINK_MAN;
     private  String LINK_TEL;
     private  String PROJECT_AMT;
     private  String PROJECT_SIZE;
+
+    public String getENGINEER_AMT() {
+        return ENGINEER_AMT;
+    }
+
+    public void setENGINEER_AMT(String ENGINEER_AMT) {
+        this.ENGINEER_AMT = ENGINEER_AMT;
+    }
+
+    public String getCUST_ID() {
+        return CUST_ID;
+    }
+
+    public void setCUST_ID(String CUST_ID) {
+        this.CUST_ID = CUST_ID;
+    }
+
     private  String MREGIE_ID;
     private  String CREGIE_ID;
     private  String QREGIE_ID;
@@ -32,6 +51,16 @@ public class ProjectDetail1 {
     private  String PAY_TYPE_VALUE;
     private  String LIST_NUM;
     private  String IS_COLLECT;
+
+    public int getIsAppraise() {
+        return isAppraise;
+    }
+
+    public void setIsAppraise(int isAppraise) {
+        this.isAppraise = isAppraise;
+    }
+
+    private int isAppraise;
 
     public String getPROJECT_NUM() {
         return PROJECT_NUM;

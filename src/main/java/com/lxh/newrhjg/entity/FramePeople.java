@@ -6,17 +6,9 @@ public class FramePeople {
     private String phone;
     private String usertype;
     private int userFlag;
+    private int engineerType;
     private int dealNum;
     private double dealMoney;
-
-    public int getUserFlag() {
-        return userFlag;
-    }
-
-    public void setUserFlag(int userFlag) {
-        this.userFlag = userFlag;
-    }
-
     private String iconurl;
     private String familiar;
     private String familiarChina;
@@ -27,17 +19,164 @@ public class FramePeople {
     private String superDes;
     private String registerTime;
     private String password;
+
     private String openId;
     private String nickName;
-    private String avatarUrl;
-    private String gender;
 
-    public String getAvatarUrl() {
-        return avatarUrl;
+    public Double getRemainingSum() {
+        return remainingSum;
     }
 
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
+    public void setRemainingSum(Double remainingSum) {
+        this.remainingSum = remainingSum;
+    }
+
+    private String avatarUrl;
+    private String gender;
+    private  String expireTime;
+    private  Double reward;
+    private int finishNum;
+    private Double deposit;
+    private Double remainingSum;
+    private  String depositTime;
+
+    private int engineerShareNewUserCouponCount;
+    private int customShareNewUserCouponCount;
+
+    private int customAddProjectCouponCount;
+
+    public int getCustomIntegralAmount() {
+        return customIntegralAmount;
+    }
+
+    public void setCustomIntegralAmount(int customIntegralAmount) {
+        this.customIntegralAmount = customIntegralAmount;
+    }
+
+    public String getCustomLastSignInTime() {
+        return customLastSignInTime;
+    }
+
+    public void setCustomLastSignInTime(String customLastSignInTime) {
+        this.customLastSignInTime = customLastSignInTime;
+    }
+
+    public int getEngineerIntegralAmount() {
+        return engineerIntegralAmount;
+    }
+
+    public void setEngineerIntegralAmount(int engineerIntegralAmount) {
+        this.engineerIntegralAmount = engineerIntegralAmount;
+    }
+
+    public String getEngineerLastSignInTime() {
+        return engineerLastSignInTime;
+    }
+
+    public void setEngineerLastSignInTime(String engineerLastSignInTime) {
+        this.engineerLastSignInTime = engineerLastSignInTime;
+    }
+
+    private int shareCouponCount;
+
+    public int getCustomIntegralConvertAmount() {
+        return customIntegralConvertAmount;
+    }
+
+    public void setCustomIntegralConvertAmount(int customIntegralConvertAmount) {
+        this.customIntegralConvertAmount = customIntegralConvertAmount;
+    }
+
+    public int getEngineerIntegralConvertAmount() {
+        return engineerIntegralConvertAmount;
+    }
+
+    public void setEngineerIntegralConvertAmount(int engineerIntegralConvertAmount) {
+        this.engineerIntegralConvertAmount = engineerIntegralConvertAmount;
+    }
+
+    private int customIntegralAmount;
+    private String customLastSignInTime;
+    private int engineerIntegralAmount;
+    private String engineerLastSignInTime;
+
+    private int customIntegralConvertAmount;
+    private int engineerIntegralConvertAmount;
+
+    public int getEngineerShareNewUserCouponCount() {
+        return engineerShareNewUserCouponCount;
+    }
+
+    public void setEngineerShareNewUserCouponCount(int engineerShareNewUserCouponCount) {
+        this.engineerShareNewUserCouponCount = engineerShareNewUserCouponCount;
+    }
+
+    public int getCustomShareNewUserCouponCount() {
+        return customShareNewUserCouponCount;
+    }
+
+    public void setCustomShareNewUserCouponCount(int customShareNewUserCouponCount) {
+        this.customShareNewUserCouponCount = customShareNewUserCouponCount;
+    }
+
+    public int getCustomAddProjectCouponCount() {
+        return customAddProjectCouponCount;
+    }
+
+    public void setCustomAddProjectCouponCount(int customAddProjectCounponCount) {
+        this.customAddProjectCouponCount = customAddProjectCounponCount;
+    }
+
+    public int getShareCouponCount() {
+        return shareCouponCount;
+    }
+
+    public void setShareCouponCount(int shareCouponCount) {
+        this.shareCouponCount = shareCouponCount;
+    }
+
+
+    public String getParentGuid() {
+        return parentGuid;
+    }
+
+    public void setParentGuid(String parentGuid) {
+        this.parentGuid = parentGuid;
+    }
+
+    public int getIsNewUser() {
+        return isNewUser;
+    }
+
+    public void setIsNewUser(int isNewUser) {
+        this.isNewUser = isNewUser;
+    }
+
+    private String parentGuid;
+    private int isNewUser;
+
+    public String getDepositTime() {
+        return depositTime;
+    }
+
+    public void setDepositTime(String depositTime) {
+        this.depositTime = depositTime;
+    }
+
+    public int getFinishNum() {
+        return finishNum;
+    }
+
+    public void setFinishNum(int finishNum) {
+        this.finishNum = finishNum;
+    }
+
+    public Double getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(Double deposit) {
+        this.deposit = deposit;
     }
 
     private String country;
@@ -50,6 +189,67 @@ public class FramePeople {
     private String bzj;
     private String cjs;
     private String cje;
+
+    public String getPurchaseTypes() {
+        return purchaseTypes;
+    }
+
+    public void setPurchaseTypes(String purchaseTypes) {
+        this.purchaseTypes = purchaseTypes;
+    }
+
+    private String purchaseTypes;
+
+    public int getEngineerType() {
+        return engineerType;
+    }
+
+    public void setEngineerType(int engineerType) {
+        this.engineerType = engineerType;
+    }
+
+    public int getUserFlag() {
+        return userFlag;
+    }
+
+    public void setUserFlag(int userFlag) {
+        this.userFlag = userFlag;
+    }
+
+    public String getExpireTime() {
+        return expireTime;
+    }
+
+    public void setExpireTime(String expireTime) {
+        this.expireTime = expireTime;
+    }
+
+    public Double getReward() {
+        return reward;
+    }
+
+    public void setReward(Double reward) {
+        this.reward = reward;
+    }
+
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    private int level;
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 
     public int getRow_id() {
         return row_id;

@@ -64,6 +64,16 @@ public class SMART_PROJECT {
         this.PROJECT_AMT = PROJECT_AMT;
     }
 
+    private  String ENGINEER_AMT;
+
+    public String getENGINEER_AMT() {
+        return ENGINEER_AMT;
+    }
+
+    public void setENGINEER_AMT(String ENGINEER_AMT) {
+        this.ENGINEER_AMT = ENGINEER_AMT;
+    }
+
     private   String MREGIE_ID;
     public String getMREGIE_ID() {
         return MREGIE_ID;
@@ -377,4 +387,52 @@ public class SMART_PROJECT {
     public void setProductguid(String productguid) {
         this.productguid = productguid;
     }
+
+    public String getSTATUS_VALUE() {
+        return STATUS_VALUE;
+    }
+
+    public void setSTATUS_VALUE(String STATUS_VALUE) {
+        this.STATUS_VALUE = STATUS_VALUE;
+    }
+
+    public String getJUDGE_BUTTON() {
+        return JUDGE_BUTTON;
+    }
+
+    public void setJUDGE_BUTTON(String JUDGE_BUTTON) {
+        this.JUDGE_BUTTON = JUDGE_BUTTON;
+    }
+
+    private  String STATUS_VALUE;
+    private  String JUDGE_BUTTON;
+
+    public String getWinBiddingTime() {
+        return winBiddingTime;
+    }
+
+    public void setWinBiddingTime(String winBiddingTime) {
+        this.winBiddingTime = winBiddingTime;
+    }
+
+    public String getNextUploadProcessTime() {
+        return nextUploadProcessTime;
+    }
+
+    public void setNextUploadProcessTime(String nextUploadProcessTime) {
+        this.nextUploadProcessTime = nextUploadProcessTime;
+    }
+
+    private String winBiddingTime;
+    private  String nextUploadProcessTime;
+
+    public int getIsAppraise() {
+        return isAppraise;
+    }
+
+    public void setIsAppraise(int isAppraise) {
+        this.isAppraise = isAppraise;
+    }
+
+    private int isAppraise;
 }

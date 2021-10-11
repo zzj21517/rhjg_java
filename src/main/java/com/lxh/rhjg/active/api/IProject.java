@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface IProject extends Serializable {
-   public SMART_PROJECT findProject(String fieldname, String fieldvalue);
+   public SMART_PROJECT findCurProject();
+   public List<SMART_PROJECT> findProject(String condition);
    //插入项目
    public int InsertProject(SMART_PROJECT smartProject);
    public void updateproject(SMART_PROJECT smartProject);

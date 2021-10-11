@@ -11,6 +11,7 @@ import java.util.Map;
 public  interface IPeople extends Serializable {
     public SMART_PEOPLE findPeople(String fieldname, String fieldvalue);
      public void insertProjectUser(SMART_PROJECT_USER projectUser);
+    public void updateProjectUser(SMART_PROJECT_USER projectUser);
     public void insertUser(SMART_PEOPLE smartPeople);
     public void insertPeopleExt(SMART_PEOPLE_EXT smartPeopleExt);
     public void deleteProjectUser(String project_num,String uid);

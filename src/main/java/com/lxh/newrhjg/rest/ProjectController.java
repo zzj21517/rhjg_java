@@ -2,10 +2,10 @@ package com.lxh.newrhjg.rest;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lxh.contract.api.IContract;
+import com.lxh.newrhjg.api.IframePeople;
 import com.lxh.newrhjg.api.IframeProject;
 import com.lxh.newrhjg.api.Inewcommon;
-import com.lxh.newrhjg.entity.FrameMenu;
-import com.lxh.newrhjg.entity.FrameMember;
+import com.lxh.newrhjg.entity.*;
 import com.lxh.rhjg.active.api.*;
 import com.lxh.rhjg.circle.api.ICircle;
 import com.lxh.rhjg.circle.api.SMART_PHOTO;
@@ -13,10 +13,7 @@ import com.lxh.rhjg.common.util.Common;
 import com.lxh.rhjg.common.util.HttpClient;
 import com.lxh.rhjg.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -45,29 +42,255 @@ public class ProjectController {
     Inewcommon inewcommon;
     @Autowired
     IframeProject iframeProject;
+    @Autowired
+    IframePeople iframePeople;
+
+    /*
+     * 获取评价
+     */
+    @RequestMapping(value = "/GetRate", method = RequestMethod.POST)
+    public String GetRate(@RequestBody String params) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String projectNum=jsonObject.getString("projectNum");
+            FrameRate rate = iframeProject.findRate("projectNum='"+projectNum+"'");
+            if(rate!=null){
+                rJsonObject.put("code", "200");
+                rJsonObject.put("appraiseRate", rate);
+            }else{
+                rJsonObject.put("code","500");
+            }
+        } catch (Exception err) {
+            System.out.println(err);
+        }
+        return rJsonObject.toJSONString();
+    }
+    /*
+     * 新增优惠券
+     */
+    @RequestMapping(value = "/AddRate", method = RequestMethod.POST)
+    public String AddRate(@RequestBody String params, @RequestHeader("openId") String openId) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            if (openId == null) {
+                rJsonObject.put("code", "4000");
+                return rJsonObject.toJSONString();
+            }
+            FramePeople people = new FramePeople();
+            people = iframePeople.findPeople("openid", openId);
+            if (people == null) {
+                rJsonObject.put("code", "400");
+                return rJsonObject.toJSONString();
+            }
+            String rateGuid=people.getRowGuid();
+            SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String createTime = sDateFormat.format(new Date());
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String rowGuid=UUID.randomUUID().toString();
+            String projectNum=jsonObject.getString("projectNum");
+            String ratedGuid=jsonObject.getString("ratedGuid");
+            int completeRate=jsonObject.getIntValue("completeRate");
+            int qualityRate=jsonObject.getIntValue("qualityRate");
+            int serviceAttiduteRate=jsonObject.getIntValue("serviceAttiduteRate");
+            int cooperationRate=jsonObject.getIntValue("cooperationRate");
+            int timelyRate=jsonObject.getIntValue("timelyRate");
+            int uploadRate=jsonObject.getIntValue("uploadRate");
+            FrameRate rate =new FrameRate();
+            rate.setRowGuid(rowGuid);
+            rate.setRateGuid(rateGuid);
+            rate.setRatedGuid(ratedGuid);
+            rate.setProjectNum(projectNum);
+            rate.setCompleteRate(completeRate);
+            rate.setQualityRate(qualityRate);
+            rate.setServiceAttiduteRate(serviceAttiduteRate);
+            rate.setTimelyRate(timelyRate);
+            rate.setCooperationRate(cooperationRate);
+            rate.setUploadRate(uploadRate);
+            rate.setCreateTime(createTime);
+            FrameRate rateRecord = iframeProject.findRate("projectNum='"+projectNum+"'");
+            if(rateRecord!=null){
+                rJsonObject.put("code","500");
+                return rJsonObject.toJSONString();
+            }
+            int n=iframeProject.insertRate(rate);
+            if(n!=0){
+                iProject.Commonupdateproject(" STATUS='04' ,isAppraise=1", " PROJECT_NUM='" + projectNum + "'");
+                rJsonObject.put("code", "200");
+            }else{
+                rJsonObject.put("code","500");
+            }
+        } catch (Exception err) {
+            System.out.println(err);
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    /*
+     * 新增优惠券
+     */
+    @RequestMapping(value = "/AddCoupon", method = RequestMethod.POST)
+    public String AddCoupon(@RequestBody String params, @RequestHeader("openId") String openId) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            if (openId == null) {
+                rJsonObject.put("code", "4000");
+                return rJsonObject.toJSONString();
+            }
+            FramePeople people = new FramePeople();
+            people = iframePeople.findPeople("openid", openId);
+            if (people == null) {
+                rJsonObject.put("code", "400");
+                return rJsonObject.toJSONString();
+            }
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String couponType = jsonObject.getString("couponType");
+            Boolean canAdd = false;
+            if (couponType.equals("1") && people.getEngineerShareNewUserCouponCount() > 0) {
+                canAdd = true;
+                people.setEngineerShareNewUserCouponCount(people.getEngineerShareNewUserCouponCount() - 1);
+            }
+            if (couponType.equals("2") && people.getCustomShareNewUserCouponCount() > 0) {
+                canAdd = true;
+                people.setCustomShareNewUserCouponCount(people.getCustomShareNewUserCouponCount() - 1);
+            }
+            if (couponType.equals("3") && people.getCustomAddProjectCouponCount() > 0) {
+                canAdd = true;
+                people.setCustomAddProjectCouponCount(people.getCustomAddProjectCouponCount() - 1);
+            }
+            if (couponType.equals("4") && people.getShareCouponCount() > 0) {
+                canAdd = true;
+                people.setShareCouponCount(people.getShareCouponCount() - 1);
+            }
+            if(couponType.equals("5")&&people.getEngineerIntegralConvertAmount()>0){
+                canAdd=true;
+                people.setEngineerIntegralConvertAmount(people.getEngineerIntegralConvertAmount()-1);
+            }
+            if(couponType.equals("6")&&people.getCustomIntegralConvertAmount()>0){
+                canAdd=true;
+                people.setCustomIntegralConvertAmount(people.getCustomIntegralConvertAmount()-1);
+            }
+            String giveGuid=null;
+//            平台发放
+            if(couponType.equals("7")){
+                canAdd=true;
+                giveGuid=jsonObject.getString("giveGuid");
+            }
+            String couponName = jsonObject.getString("couponName");
+            if (canAdd) {
+                int n = iframePeople.update(people);
+                if (couponName != null) {
+                    String userGuid = jsonObject.getString("userGuid");
+                    int userFlag = jsonObject.getIntValue("userFlag");
+                    String couponFrom = jsonObject.getString("couponFrom");
+                    String createTime = jsonObject.getString("createTime");
+                    String expireTime = jsonObject.getString("expireTime");
+                    int couponAmount = jsonObject.getIntValue("couponAmount");
+                    int couponStatus = jsonObject.getIntValue("couponStatus");
+                    FrameCoupon coupon = new FrameCoupon();
+                    coupon.setRowGuid(UUID.randomUUID().toString());
+                    coupon.setUserGuid(userGuid);
+                    coupon.setUserFlag(userFlag);
+                    coupon.setCouponFrom(couponFrom);
+                    coupon.setCouponAmount(couponAmount);
+                    coupon.setCouponName(couponName);
+                    coupon.setCouponStatus(couponStatus);
+                    coupon.setCreateTime(createTime);
+                    coupon.setExpireTime(expireTime);
+                    coupon.setGiveGuid(giveGuid);
+                    int n1 = iframeProject.insertCoupon(coupon);
+                    if (n != 0 && n1 != 0) {
+                        rJsonObject.put("code", "200");
+                        rJsonObject.put("isWin",true);
+                    } else {
+                        rJsonObject.put("code", "500");
+                    }
+
+                } else {
+                    if (n!= 0) {
+                        rJsonObject.put("code", "200");
+                    } else {
+                        rJsonObject.put("code", "500");
+                    }
+                }
+            } else {
+                rJsonObject.put("code", "500");
+            }
+        } catch (Exception err) {
+            System.out.println(err);
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    /*
+     * 发放的优惠券列表
+     */
+    @RequestMapping(value = "/GetCouponGiveList", method = RequestMethod.POST)
+    public String GetCouponGiveList(@RequestBody String params) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String userGuid=jsonObject.getString("userGuid");
+            int onOff = jsonObject.getIntValue("onOff");
+            int userFlag=jsonObject.get("userFlag")!=null?jsonObject.getIntValue("userFlag"):1;
+            List<FrameCouponGive> list = iframeProject.findCouponGiveList("onOff="+onOff+" and userFlag="+userFlag+" and not EXISTS(SELECT giveGuid FROM Frame_Coupon WHERE frame_coupon_give.rowGuid =frame_coupon.giveGuid and frame_coupon.userGuid='"+userGuid+" ') ");
+            rJsonObject.put("code", "200");
+            rJsonObject.put("subCode","0");
+            rJsonObject.put("list", list);
+        } catch (Exception err) {
+            System.out.println(err);
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    /*
+     * 优惠券列表
+     */
+    @RequestMapping(value = "/GetCouponList", method = RequestMethod.POST)
+    public String GetCouponList(@RequestBody String params) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String userGuid = jsonObject.getString("userGuid");
+            int userFlag=jsonObject.get("userFlag")!=null?jsonObject.getIntValue("userFlag"):1;
+            List<FrameCoupon> list = iframeProject.findCouponList("userGUid='"+userGuid+"' and userFlag="+userFlag);
+            rJsonObject.put("code", "200");
+            rJsonObject.put("list", list);
+        } catch (Exception err) {
+            System.out.println(err);
+        }
+        return rJsonObject.toJSONString();
+    }
+
     /*
      * 首页数据
      */
     @RequestMapping(value = "/GetMemberList", method = RequestMethod.POST)
     public String GetMemberList(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
-        try{
-            List<FrameMember> list =iframeProject.findMemberList();
+        try {
+            List<FrameMember> list = iframeProject.findMemberList();
             rJsonObject.put("code", "200");
             rJsonObject.put("list", list);
-        }catch (Exception err){
+        } catch (Exception err) {
             System.out.println(err);
         }
         return rJsonObject.toJSONString();
     }
+
     @RequestMapping(value = "/GetMenuList", method = RequestMethod.POST)
     public String GetMenuList(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
-        try{
-            List<FrameMenu> list =iframeProject.findMenuList();
+        try {
+            List<FrameMenu> list = iframeProject.findMenuList();
             rJsonObject.put("code", "200");
             rJsonObject.put("list", list);
-        }catch (Exception err){
+        } catch (Exception err) {
             System.out.println(err);
         }
         return rJsonObject.toJSONString();
@@ -77,7 +300,7 @@ public class ProjectController {
     public String GetBanner(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String uid = jsonObject.get("uid").toString();
         List<SMART_PHOTO> photoList = icircle.GetCircleDetail(" and ITEM_TYPE='07' AND IS_DELETE='0' ORDER BY DATATIME DESC, IMG_ORDER ASC");
         List<JSONObject> list = iLuck.GetBannerLuckyBag();
@@ -105,7 +328,7 @@ public class ProjectController {
     public String JudgePeople(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String pid = jsonObject.get("pid").toString();
         String key1 = jsonObject.get("key1").toString();
         String key = jsonObject.get("key").toString();
@@ -118,6 +341,7 @@ public class ProjectController {
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 选择中标人员
      */
@@ -125,19 +349,26 @@ public class ProjectController {
     public String ChooseUser(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String fid = jsonObject.get("fid").toString();
-        String uid = jsonObject.get("uid").toString();
+        String projectNum = jsonObject.get("projectNum").toString();
+        String winBiddingTime=jsonObject.getString("winBiddingTime");
+        String nextUploadProcessTime=jsonObject.getString("nextUploadProcessTime");
         try {
-            iProject.Commonupdateproject("STATUS='01'", " PROJECT_NUM='" + fid + "'");
-            iProject.Commonupdateproject("STATUS='06'", " PROJECT_NUM='" + fid + "'  AND USER_ID IN (SELECT USER_ID FROM SMART_PEOPLE WHERE USER_ID = '" + uid + "' )");
-            iProject.Commonupdateproject("STATUS='05'", " PROJECT_NUM='" + fid + "'  AND USER_ID NOT IN (SELECT USER_ID FROM SMART_PEOPLE WHERE USER_ID = '" + uid + "' )");
+
+            iProject.Commonupdateproject("winBiddingTime='"+winBiddingTime+"',"+"STATUS='02',nextUploadProcessTime='"+nextUploadProcessTime+"'", " PROJECT_NUM='" + projectNum + "'");
+            SMART_PROJECT_USER projectUser = new SMART_PROJECT_USER();
+            projectUser.setSTATUS("06");
+            projectUser.setPROJECT_NUM(projectNum);
+            projectUser.setUSER_ID(fid);
+            iPeople.updateProjectUser(projectUser);
             rJsonObject.put("code", "200");
         } catch (Exception e) {
             rJsonObject.put("code", "400");
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 获取项目详细
      */
@@ -145,39 +376,48 @@ public class ProjectController {
     public String GetProjectDetail001(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String fid = jsonObject.get("fid").toString();
         String uid = jsonObject.get("custid").toString();
-        List<ProjectDetail> detailList=iProject.GetProjectDetail001(fid,uid);
+        List<ProjectDetail> detailList = iProject.GetProjectDetail001(fid, uid);
         //获取保证金
-         SMART_PEOPLE smartPeople=iPeople.findPeople("USER_ID",uid);
-        double money=Double.valueOf(smartPeople.getMONEY());
+        SMART_PEOPLE smartPeople = iPeople.findPeople("USER_ID", uid);
+        double money = Double.valueOf(smartPeople.getMONEY());
 
         //增加中标人的信息
-        List<UserProjectDetail> list=iProject.GetZBUserDetail(fid);
+        List<UserProjectDetail> list = iProject.GetZBUserDetail(fid);
         rJsonObject.put("code", "200");
         rJsonObject.put("zhong", list);
         rJsonObject.put("account", money);
         rJsonObject.put("results", detailList);
         return rJsonObject.toJSONString();
     }
+
     /*
      * 获取项目详细
      */
     @RequestMapping(value = "/GetProjectDetail", method = RequestMethod.POST)
     public String GetProjectDetail(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
-        JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String fid = jsonObject.get("fid").toString();
-        String uid = jsonObject.get("custid").toString();
-        List<ProjectDetail1>  list=iProject.GetProjectDetail(fid,uid);
-        List<UserProjectDetail1> detail1List=iProject.GetZBUserDetail1(fid);
-        rJsonObject.put("code", "200");
-        rJsonObject.put("bidding", detail1List);
-        rJsonObject.put("results", list);
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String fid = jsonObject.get("fid").toString();
+            String uid = jsonObject.get("custid").toString();
+            List<ProjectDetail1> list = iProject.GetProjectDetail(fid, uid);
+            System.out.println(list);
+            List<UserProjectDetail1> detail1List = iProject.GetZBUserDetail1(fid);
+            System.out.println(detail1List);
+            rJsonObject.put("code", "200");
+            rJsonObject.put("bidding", detail1List);
+            rJsonObject.put("results", list);
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
+        }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 更新项目的支付状态
      */
@@ -185,19 +425,20 @@ public class ProjectController {
     public String UpdatePayStatus(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String fid = jsonObject.get("fid").toString();
         String uid = jsonObject.get("uid").toString();
         String amt = jsonObject.get("amt").toString();
-        try{
+        try {
             //下一环节签合同
-            iProject.Commonupdateproject("PAY_STATUS='01',PAY_AMT='"+amt+"',STATUS='02' ","PROJECT_NUM='"+fid+"' AND CUST_ID='"+uid+"'");
+            iProject.Commonupdateproject("PAY_STATUS='01',PAY_AMT='" + amt + "',STATUS='02' ", "PROJECT_NUM='" + fid + "' AND CUST_ID='" + uid + "'");
             rJsonObject.put("code", "200");
-        }catch (Exception e){
+        } catch (Exception e) {
             rJsonObject.put("code", "400");
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 签订合同
      */
@@ -205,7 +446,7 @@ public class ProjectController {
     public String SignContract(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String pid = jsonObject.get("pid").toString();
         String begin = jsonObject.get("begin").toString();
         String end = jsonObject.get("end").toString();
@@ -216,10 +457,10 @@ public class ProjectController {
         String date1 = jsonObject.get("date1").toString();
         String receiver = jsonObject.get("receiver").toString();
         String date2 = jsonObject.get("date2").toString();
-        SimpleDateFormat sDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datatime=sDateFormat.format(new Date());
-        String guid=UUID.randomUUID().toString();
-        SMART_CONTRACT smartContract=new SMART_CONTRACT();
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String datatime = sDateFormat.format(new Date());
+        String guid = UUID.randomUUID().toString();
+        SMART_CONTRACT smartContract = new SMART_CONTRACT();
         smartContract.setGUID(guid);
         smartContract.setPROJECT_NUM(pid);
         smartContract.setUSER_ID(null);
@@ -235,17 +476,18 @@ public class ProjectController {
         smartContract.setSTATUS("00");
         smartContract.setDATATIME1(datatime);
         smartContract.setDATATIME2(datatime);
-        try{
-        //插入数据
-        iContract.InsertContract(smartContract);
-        //更新项目的状态
-        iProject.Commonupdateproject("STATUS='03'"," PROJECT_NUM='"+pid+"'");
-            rJsonObject.put("code","200");
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+        try {
+            //插入数据
+            iContract.InsertContract(smartContract);
+            //更新项目的状态
+            iProject.Commonupdateproject("STATUS='03'", " PROJECT_NUM='" + pid + "'");
+            rJsonObject.put("code", "200");
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
-       return  rJsonObject.toJSONString();
+        return rJsonObject.toJSONString();
     }
+
     /*
      * 签订合同
      */
@@ -253,18 +495,19 @@ public class ProjectController {
     public String SignContract001(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String pid = jsonObject.get("pid").toString();
-        SimpleDateFormat sDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datatime=sDateFormat.format(new Date());
-        try{
-          iContract.CommonupdateContract("STATUS='02',DATATIME2='"+datatime+"'","PROJECT_NUM='"+pid+"' ");
-            rJsonObject.put("code","200");
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String datatime = sDateFormat.format(new Date());
+        try {
+            iContract.CommonupdateContract("STATUS='02',DATATIME2='" + datatime + "'", "PROJECT_NUM='" + pid + "' ");
+            rJsonObject.put("code", "200");
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
-        return  rJsonObject.toJSONString();
+        return rJsonObject.toJSONString();
     }
+
     /*
      * 签订合同
      */
@@ -272,17 +515,18 @@ public class ProjectController {
     public String CheckContract(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String pid = jsonObject.get("pid").toString();
-        try{
-           List<SMART_CONTRACT>  list=iContract.findSmartConTract("PROJECT_NUM='"+pid+"'");
-            rJsonObject.put("code","200");
-            rJsonObject.put("results",list);
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+        try {
+            List<SMART_CONTRACT> list = iContract.findSmartConTract("PROJECT_NUM='" + pid + "'");
+            rJsonObject.put("code", "200");
+            rJsonObject.put("results", list);
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
-        return  rJsonObject.toJSONString();
+        return rJsonObject.toJSONString();
     }
+
     /*
      * 获取用户详细数据
      */
@@ -290,59 +534,60 @@ public class ProjectController {
     public String TongJiProject(@RequestBody String params) throws IOException {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         String pid = jsonObject.get("pid").toString();
-        try{
-            JSONObject object=iProject.TongJiProject();
-            rJsonObject.put("code","200");
-            rJsonObject.put("results",object);
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+        try {
+            JSONObject object = iProject.TongJiProject();
+            rJsonObject.put("code", "200");
+            rJsonObject.put("results", object);
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
-        return  rJsonObject.toJSONString();
+        return rJsonObject.toJSONString();
     }
+
     /*
      * 新增项目
      */
-    @RequestMapping(value = "/AddProject", method= RequestMethod.POST)
+    @RequestMapping(value = "/AddProject", method = RequestMethod.POST)
     public String AddProject(@RequestBody String params) throws IOException {
-        JSONObject rJsonObject=new JSONObject();
-        JSONObject jsonObject= JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String link_man=jsonObject.get("man").toString();
-        String link_tel=jsonObject.get("tel").toString();
-        String project_amt=jsonObject.get("amt").toString();
-        String project_size=jsonObject.get("size").toString();
-        String finish_date=jsonObject.get("finish").toString();
-        String project_desc=jsonObject.get("desc").toString();
-        String sheng=jsonObject.get("sheng").toString();
-        String shi=jsonObject.get("shi").toString();
-        String xian=jsonObject.get("xian").toString();
-        String uid=jsonObject.get("uid").toString();
-        String classify=jsonObject.get("classify").toString();
-        SimpleDateFormat sDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datatime=sDateFormat.format(new Date());
-        String tuijian=jsonObject.get("tuijian").toString();
-        String used=jsonObject.get("used").toString();
-        String professional=jsonObject.get("professional").toString();
-        String name=jsonObject.get("name").toString();
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String link_man = jsonObject.get("man").toString();
+        String link_tel = jsonObject.get("tel").toString();
+        String project_amt = jsonObject.get("amt").toString();
+        String project_size = jsonObject.get("size").toString();
+        String finish_date = jsonObject.get("finish").toString();
+        String project_desc = jsonObject.get("desc").toString();
+        String sheng = jsonObject.get("sheng").toString();
+        String shi = jsonObject.get("shi").toString();
+        String xian = jsonObject.get("xian").toString();
+        String uid = jsonObject.get("uid").toString();
+        String classify = jsonObject.get("classify").toString();
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String datatime = sDateFormat.format(new Date());
+        String tuijian = jsonObject.get("tuijian").toString();
+        String used = jsonObject.get("used").toString();
+        String professional = jsonObject.get("professional").toString();
+        String name = jsonObject.get("name").toString();
 
         //新增项2018.8.20
-        String type=jsonObject.get("type").toString();
-        String requirement=jsonObject.get("requirement").toString();
-        String chailv=jsonObject.get("chailv").toString();
-        String chizhu=jsonObject.get("chizhu").toString();
-        String biaoclassify=jsonObject.get("biaoclassify").toString();
-        String zhiliang=jsonObject.get("zhiliang").toString();
+        String type = jsonObject.get("type").toString();
+        String requirement = jsonObject.get("requirement").toString();
+        String chailv = jsonObject.get("chailv").toString();
+        String chizhu = jsonObject.get("chizhu").toString();
+        String biaoclassify = jsonObject.get("biaoclassify").toString();
+        String zhiliang = jsonObject.get("zhiliang").toString();
         //增加是否可议价
-        String YiJia=jsonObject.get("YiJia").toString();
-        String PayType=jsonObject.get("PayType").toString();
-        String ListNum=jsonObject.get("ListNum").toString();
-        String Unit=jsonObject.get("Unit").toString();
-        String productguid=jsonObject.get("productguid").toString();
-        Common common=new Common();
-        String project_num=GetRuleStr("PROJECT_NUM");
-        SMART_PROJECT smartProject=new SMART_PROJECT();
+        String YiJia = jsonObject.get("YiJia").toString();
+        String PayType = jsonObject.get("PayType").toString();
+        String ListNum = jsonObject.get("ListNum").toString();
+        String Unit = jsonObject.get("Unit").toString();
+        String productguid = jsonObject.get("productguid").toString();
+        Common common = new Common();
+        String project_num = GetRuleStr("PROJECT_NUM");
+        SMART_PROJECT smartProject = new SMART_PROJECT();
         smartProject.setPROJECT_NUM(project_num);
         smartProject.setCUST_ID(uid);
         smartProject.setPROJECT_CLASSIFY(classify);
@@ -372,69 +617,70 @@ public class ProjectController {
         smartProject.setLIST_NUM(ListNum);
         smartProject.setPROJECT_SIZE_TYPE(Unit);
         smartProject.setProductguid(productguid);
-        try{
-        iProject.InsertProject(smartProject);
-            rJsonObject.put("code","200");
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+        try {
+            iProject.InsertProject(smartProject);
+            rJsonObject.put("code", "200");
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
-      return rJsonObject.toJSONString();
+        return rJsonObject.toJSONString();
     }
+
     /*
      * 修改项目
      */
-    @RequestMapping(value = "/UpdateProject", method= RequestMethod.POST)
+    @RequestMapping(value = "/UpdateProject", method = RequestMethod.POST)
     public String UpdateProject(@RequestBody String params) throws IOException {
         //获取参数
-        JSONObject rJsonObject=new JSONObject();
-        JSONObject jsonObject= JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String pid=jsonObject.get("pid").toString();
-        String man=jsonObject.get("man").toString();
-        String tel=jsonObject.get("tel").toString();
-        String amt=jsonObject.get("amt").toString();
-        String desc=jsonObject.get("desc").toString();
-        SMART_PROJECT smartProject=new SMART_PROJECT();
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String pid = jsonObject.get("pid").toString();
+        String man = jsonObject.get("man").toString();
+        String tel = jsonObject.get("tel").toString();
+        String amt = jsonObject.get("amt").toString();
+        String desc = jsonObject.get("desc").toString();
+        SMART_PROJECT smartProject = new SMART_PROJECT();
         smartProject.setLINK_TEL(tel);
         smartProject.setLINK_MAN(man);
         smartProject.setPROJECT_AMT(amt);
         smartProject.setPROJECT_DESC(desc);
         smartProject.setPROJECT_NUM(pid);
 
-          try{
-              iProject.updateproject(smartProject);
-              rJsonObject.put("code","200");
-          }catch (Exception e){
-              rJsonObject.put("code","400");
-          }
-          return rJsonObject.toJSONString();
+        try {
+            iProject.updateproject(smartProject);
+            rJsonObject.put("code", "200");
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
     }
 
     /*
      * 修改项目
      */
-    @RequestMapping(value = "/UpdateProject001", method= RequestMethod.POST)
+    @RequestMapping(value = "/UpdateProject001", method = RequestMethod.POST)
     public String UpdateProject001(@RequestBody String params) throws IOException {
         //获取参数
-        JSONObject rJsonObject=new JSONObject();
-        JSONObject jsonObject= JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String pid=jsonObject.get("pid").toString();
-        String man=jsonObject.get("man").toString();
-        String tel=jsonObject.get("tel").toString();
-        String amt=jsonObject.get("amt").toString();
-        String desc=jsonObject.get("desc").toString();
-        String size=jsonObject.get("size").toString();
-        String date1=jsonObject.get("date1").toString();
-        String zhuanxiang=jsonObject.get("zhuanxiang").toString();
-        SimpleDateFormat sDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datatime=sDateFormat.format(new Date());
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String pid = jsonObject.get("pid").toString();
+        String man = jsonObject.get("man").toString();
+        String tel = jsonObject.get("tel").toString();
+        String amt = jsonObject.get("amt").toString();
+        String desc = jsonObject.get("desc").toString();
+        String size = jsonObject.get("size").toString();
+        String date1 = jsonObject.get("date1").toString();
+        String zhuanxiang = jsonObject.get("zhuanxiang").toString();
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String datatime = sDateFormat.format(new Date());
 
-        String label1=jsonObject.get("label1").toString();
-        String label2=jsonObject.get("label2").toString();
-        String label3=jsonObject.get("label3").toString();
+        String label1 = jsonObject.get("label1").toString();
+        String label2 = jsonObject.get("label2").toString();
+        String label3 = jsonObject.get("label3").toString();
 
-        SMART_PROJECT smartProject=new SMART_PROJECT();
+        SMART_PROJECT smartProject = new SMART_PROJECT();
         smartProject.setLINK_TEL(tel);
         smartProject.setLINK_MAN(man);
         smartProject.setPROJECT_AMT(amt);
@@ -447,11 +693,11 @@ public class ProjectController {
         smartProject.setLABEL_1(label1);
         smartProject.setLABEL_2(label2);
         smartProject.setLABEL_3(label3);
-        try{
+        try {
             iProject.updateproject(smartProject);
-            rJsonObject.put("code","200");
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+            rJsonObject.put("code", "200");
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
         return rJsonObject.toJSONString();
     }
@@ -459,20 +705,20 @@ public class ProjectController {
     /*
      * 删除项目
      */
-    @RequestMapping(value = "/DeleteProject", method= RequestMethod.POST)
+    @RequestMapping(value = "/DeleteProject", method = RequestMethod.POST)
     public String DeleteProject(@RequestBody String params) throws IOException {
         //获取参数
-        JSONObject rJsonObject=new JSONObject();
-        JSONObject jsonObject= JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String pid=jsonObject.get("pid").toString();
-        SMART_PROJECT project=new SMART_PROJECT();
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String pid = jsonObject.get("pid").toString();
+        SMART_PROJECT project = new SMART_PROJECT();
         project.setPROJECT_NUM(pid);
-        try{
+        try {
             iProject.deleteproject(project);
-            rJsonObject.put("code","200");
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+            rJsonObject.put("code", "200");
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
         return rJsonObject.toJSONString();
     }
@@ -480,67 +726,76 @@ public class ProjectController {
     /*
      * 新增投标
      */
-    @RequestMapping(value = "/AddProjectUser", method= RequestMethod.POST)
-    public String AddProjectUser(@RequestBody String params) throws IOException {
+    @RequestMapping(value = "/AddProjectUser", method = RequestMethod.POST)
+    public String AddProjectUser(@RequestBody String params, @RequestHeader("openId") String openId) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        if (openId == null) {
+            rJsonObject.put("code", "4000");
+            return rJsonObject.toJSONString();
+        }
+        FramePeople people = new FramePeople();
+        people = iframePeople.findPeople("openid", openId);
+        if (people == null) {
+            rJsonObject.put("code", "400");
+            rJsonObject.put("error", "接口异常");
+            return rJsonObject.toJSONString();
+        }
         //获取参数
-        JSONObject rJsonObject=new JSONObject();
-        JSONObject jsonObject= JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String uid=jsonObject.get("uid").toString();
-        String Guid= UUID.randomUUID().toString();
-        String link_man=jsonObject.get("man").toString();
-        String link_tel=jsonObject.get("tel").toString();
-        String project_amt=jsonObject.get("amt").toString();
-        String project_desc=jsonObject.get("desc").toString();
-        String project_num=jsonObject.get("fid").toString();
-        SimpleDateFormat sDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String datatime=sDateFormat.format(new Date());
-       SMART_PEOPLE smartPeople=iPeople.findPeople("USER_ID",uid);
-        String money=smartPeople.getNICK_NAME();
-        SMART_PROJECT_USER projectUser=new SMART_PROJECT_USER();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String Guid = UUID.randomUUID().toString();
+        String link_man = jsonObject.get("bidName").toString();
+        String project_amt = jsonObject.get("bidAmount").toString();
+        String project_num = jsonObject.get("code").toString();
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String datatime = sDateFormat.format(new Date());
+        String nickName = people.getNickName();
+        String link_tel = people.getPhone();
+        String uid = people.getRowGuid();
+        SMART_PROJECT_USER projectUser = new SMART_PROJECT_USER();
         projectUser.setGUID(Guid);
         projectUser.setPROJECT_NUM(project_num);
         projectUser.setUSER_ID(uid);
         projectUser.setLINK_MAN(link_man);
         projectUser.setLINK_TEL(link_tel);
         projectUser.setPROJECT_AMT(project_amt);
-        projectUser.setPROJECT_DESC(project_desc);
         projectUser.setDATATIME(datatime);
-        projectUser.setNICK_NAME(money);
+        projectUser.setNICK_NAME(nickName);
         try {
             iPeople.insertProjectUser(projectUser);
-            rJsonObject.put("code","200");
-        }catch (Exception e){
-            rJsonObject.put("code","400");
+            rJsonObject.put("code", "200");
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
         }
-       return  rJsonObject.toJSONString();
+        return rJsonObject.toJSONString();
     }
+
     /*
      *
      * 取消投标
      */
-    @RequestMapping(value = "/DelProjectUser", method= RequestMethod.POST)
+    @RequestMapping(value = "/DelProjectUser", method = RequestMethod.POST)
     public String DelProjectUser(@RequestBody String params) throws IOException {
-       //获取参数
-        JSONObject rJsonObject=new JSONObject();
-        JSONObject jsonObject= JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String uid=jsonObject.get("uid").toString();
-        String project_num=jsonObject.get("fid").toString();
-        SMART_PROJECT project=iProject.findProject("PROJECT_NUM",project_num);
-      String status=  project.getSTATUS();
+        //获取参数
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String uid = jsonObject.get("uid").toString();
+        String project_num = jsonObject.get("fid").toString();
+        SMART_PROJECT project = iProject.findProject("PROJECT_NUM='" + project_num + "'").get(0);
+        String status = project.getSTATUS();
         //未选择中标人，可以取消
-      if("00".equals(status)){
-          try{
-          iPeople.deleteProjectUser(project_num,uid);
-              rJsonObject.put("code","200");
-          }catch (Exception e){
-              rJsonObject.put("code","400");
-          }
-      }else{
-          rJsonObject.put("code","100");
-      }
-        return  rJsonObject.toJSONString();
+        if ("00".equals(status)) {
+            try {
+                iPeople.deleteProjectUser(project_num, uid);
+                rJsonObject.put("code", "200");
+            } catch (Exception e) {
+                rJsonObject.put("code", "400");
+            }
+        } else {
+            rJsonObject.put("code", "100");
+        }
+        return rJsonObject.toJSONString();
     }
 
     /*
@@ -561,7 +816,7 @@ public class ProjectController {
             Map<String, Object> map = new HashMap<>();
             map.put("PROJECT_NUM=", rowguid);
             List<HashMap<String, Object>> list = inewcommon.findlist("smart_project", "*", map, "", "", pagenum, pagesize);
-            int count=inewcommon.findlist("smart_project",map,"");
+            int count = inewcommon.findlist("smart_project", map, "");
             rJsonObject.put("code", "200");
             rJsonObject.put("count", count);
             rJsonObject.put("result", list);
@@ -576,6 +831,7 @@ public class ProjectController {
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 获取商家服务详情
      */
@@ -594,11 +850,11 @@ public class ProjectController {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("CUST_ID=", userguid);
-            if(!"".equals(STATUS)){
+            if (!"".equals(STATUS)) {
                 map.put("STATUS=", STATUS);
             }
             List<HashMap<String, Object>> list = inewcommon.findlist("smart_project", "*", map, "", "", pagenum, pagesize);
-            int count=inewcommon.findlist("smart_project",map,"");
+            int count = inewcommon.findlist("smart_project", map, "");
             rJsonObject.put("code", "200");
             rJsonObject.put("count", count);
             rJsonObject.put("result", list);
@@ -613,167 +869,218 @@ public class ProjectController {
         }
         return rJsonObject.toJSONString();
     }
+
     /*
      * 获取项目列表
      */
-    @RequestMapping(value = "/GetProject", method= RequestMethod.POST)
+    @RequestMapping(value = "/GetProject", method = RequestMethod.POST)
     public String GetProject(@RequestBody String params) throws IOException {
-        //获取参数
-        JSONObject rJsonObject=new JSONObject();
-        JSONObject jsonObject= JSONObject.parseObject(params);
-        jsonObject=JSONObject.parseObject(jsonObject.getString("param"));
-        String city=jsonObject.get("city").toString();
-        String type=jsonObject.get("itemtype").toString();
-        String uid=jsonObject.get("uid").toString();
-        String keyword=jsonObject.get("keyword").toString();
-        String start=jsonObject.get("start").toString();
-        String count=jsonObject.get("count").toString();
-        int length=Integer.parseInt(start)+Integer.parseInt(count);
-        //增加排序
-        String sort=jsonObject.get("sort").toString();
-        //增加筛选条件
-        String area=jsonObject.get("area").toString();
-        String major=jsonObject.get("major").toString();
-        String sql="SELECT A.PROJECT_NUM,IFNULL(B.DICT_VALUE,'算量') PROJECT_CLASSIFY, A.PROJECT_AMT,A.MREGIE_ID," +
-                "CASE WHEN CREGIE_ID ='' THEN '未知地区' ELSE CREGIE_ID END CREGIE_ID,SUBSTR(A.DATATIME,1,10) FINISH_DATE," +
-                "A.PROJECT_DESC,A.SCAN_NUM,C.DICT_VALUE STATUS,A.PROJECT_TYPE, A.STATUS STATUS_VALUE,A.PROFESSIONAL,A.PROFESSION_NAME," +
-                "CASE WHEN (A.TUIJIAN IS NULL OR A.TUIJIAN='' OR A.TUIJIAN='15144180088') THEN '0' ELSE '1' END TUIJIAN," +
-                "A.TUIJIAN TJ,IFNULL(A.LABEL_1,'') LABEL_1 ,IFNULL(A.LABEL_2,'') LABEL_2,IFNULL(A.LABEL_3,'') LABEL_3," +
-                "IFNULL(D.PROJECT_NUM,'1') JUDGE_BUTTON FROM SMART_PROJECT A " +
-                "LEFT JOIN SMART_DICT B ON A.PROJECT_NEED = B.DICT_ID AND B.DICT_CODE='RHJG_PROJECT_NEED' " +
-                "LEFT JOIN SMART_DICT C ON A.STATUS = C.DICT_ID AND C.DICT_CODE='RHJG_STATUS' " +
-                "LEFT JOIN SMART_JUDGE D ON A.PROJECT_NUM = D.PROJECT_NUM " +
-                " WHERE 1=1 ";
-        //根据type确认查询条件
-        switch (type){
-            case "MY":
-                sql+=" AND A.CUST_ID = '$uid' ";
-                break;
-            case "TOU":
-                sql+=" AND A.PROJECT_NUM IN(SELECT PROJECT_NUM FROM SMART_PROJECT_USER WHERE USER_ID='$uid' )";
-                break;
-            case "ZHONG":
-                sql+=" AND A.PROJECT_NUM IN(SELECT PROJECT_NUM FROM SMART_PROJECT_USER WHERE USER_ID='$uid' AND STATUS='06' ) ";
-                break;
-            case "ALL":
-            {
-                switch (keyword){
-                    case "TAB1":
-                        break;
-                    case "TAB2":
-                        sql+=" AND A.PROJECT_AMT <= 1500 AND LABEL_1 NOT LIKE '%低价单%'";
-                        break;
-                    case "TAB3":
-                        sql+=" AND LABEL_1 LIKE '%低价单%'";
-                        break;
-                        default: break;
-                }
-                if(!area.equals("全国") && !area.equals("'地区'")){
-                    sql+=" AND CREGIE_ID LIKE '%$area%' ";
-                }
+        JSONObject rJsonObject = new JSONObject();
+        try {
 
-                if(!major.equals("00")){
-                    sql+=" AND PROFESSIONAL LIKE '%$major%'";
-                }
-            }
-               break;
-            case "TUI":
-                sql+=" AND STATUS > '01' AND TUIJIAN = '$uid'";
-                break;
-            case "GUAN":
-                //用户管理的项目列表
-                if(!"".equals(keyword)){
-                    sql+=" AND A.PROJECT_NUM LIKE '%$keyword%'";
-                }
-                break;
-            case "FINISH":
-                    sql+=" AND A.PROJECT_NUM IN (SELECT DISTINCT PROJECT_NUM FROM SMART_PROJECT_USER WHERE STATUS='06'  AND USER_ID='$uid' )";
-                break;
-            case "SEARCH":
-            {
-                switch (keyword){
-                    case "招标中的项目":
-                        sql+=" AND A.STATUS = '00'";
-                        break;
-                    case "1000元-3000元项目":
-                        sql+=" AND A.PROJECT_AMT BETWEEN '1000'  AND '3000' ";
-                        break;
-                    case "土建专业项目":
-                        sql+=" AND A.PROFESSION LIKE '%01%'";
-                        break;
+            //获取参数
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            String type = jsonObject.get("itemtype").toString();
+            String uid = jsonObject.get("uid").toString();
+            String keyword = jsonObject.get("keyword").toString();
+            int status = jsonObject.getIntValue("status");
+            int pageNum = Integer.parseInt(jsonObject.get("pageNum").toString());
+            int pageSize = Integer.parseInt(jsonObject.get("pageSize").toString());
+            int start = (pageNum - 1) * pageSize;
+            int end = pageSize;
+            //增加排序
+            String sort = jsonObject.get("sort").toString();
+            //增加筛选条件
+            String area = jsonObject.get("area").toString();
+            String major = jsonObject.get("major").toString();
+            System.out.println(major);
+            String sql = "SELECT A.PROJECT_NUM,A.CUST_ID,IFNULL(B.DICT_VALUE,'算量') PROJECT_CLASSIFY, A.PROJECT_AMT,A.ENGINEER_AMT,A.MREGIE_ID," +
+                    "CASE WHEN CREGIE_ID ='' THEN '未知地区' ELSE CREGIE_ID END CREGIE_ID,SUBSTR(A.FINISH_DATE,1,10) FINISH_DATE,SUBSTR(A.DATATIME,1,10) DATATIME," +
+                    "A.PROJECT_DESC,A.SCAN_NUM,C.DICT_VALUE STATUS,A.PROJECT_TYPE, A.STATUS STATUS_VALUE,A.PROFESSIONAL,A.PROFESSION_NAME," +
+                    "CASE WHEN (A.TUIJIAN IS NULL OR A.TUIJIAN='' OR A.TUIJIAN='15144180088') THEN '0' ELSE '1' END TUIJIAN," +
+                    "A.TUIJIAN TJ,IFNULL(A.LABEL_1,'') LABEL_1 ,IFNULL(A.LABEL_2,'') LABEL_2,IFNULL(A.LABEL_3,'') LABEL_3," +
+                    "IFNULL(D.PROJECT_NUM,'1') JUDGE_BUTTON FROM SMART_PROJECT A " +
+                    "LEFT JOIN SMART_DICT B ON A.PROJECT_NEED = B.DICT_ID AND B.DICT_CODE='RHJG_PROJECT_NEED' " +
+                    "LEFT JOIN SMART_DICT C ON A.STATUS = C.DICT_ID AND C.DICT_CODE='RHJG_STATUS' " +
+                    "LEFT JOIN SMART_JUDGE D ON A.PROJECT_NUM = D.PROJECT_NUM " +
+                    " WHERE 1=1 ";
+            //根据type确认查询条件
+            switch (type) {
+                case "MY":
+                    sql += "AND A.CUST_ID='" + uid + "'";
+                    break;
+                case "APPRAISE":
+                    sql += "AND A.CUST_ID='" + uid + "' AND A.isAppraise=0 AND STATUS='03' ";
+                    break;
+                case "TOU":
+                    sql += " AND A.PROJECT_NUM IN(SELECT PROJECT_NUM FROM SMART_PROJECT_USER WHERE USER_ID='" + uid + "' )";
+                    break;
+                case "ZHONG":
+                    sql += " AND A.PROJECT_NUM IN(SELECT PROJECT_NUM FROM SMART_PROJECT_USER WHERE USER_ID='" + uid + "' AND STATUS='06' )";
+                    break;
+                case "ALL": {
+                    switch (keyword) {
+                        case "TAB1":
+                            break;
+                        case "TAB2":
+                            sql += "AND A.PROJECT_AMT <= 1500 AND LABEL_1 NOT LIKE '%低价单%'";
+                            break;
+                        case "TAB3":
+                            sql += "AND LABEL_1 LIKE '%低价单%'";
+                            break;
                         default:
-                        {
-                            switch (uid){
-                                case  "00": //全部
-                                    sql+=" AND (A.PROFESSION_NAME LIKE '%$keyword%' OR A.MREGIE_ID LIKE '%$keyword%' OR A.CREGIE_ID LIKE '%$keyword%' OR A.QREGIE_ID LIKE '%$keyword%' )";
+                            break;
+                    }
+                    if (!area.equals("全国") && !area.equals("'地区'")) {
+                        sql += " AND CREGIE_ID LIKE '%" + area + "%'";
+                    }
+
+                    if (!major.equals("00")) {
+                        sql += " AND PROFESSIONAL LIKE '%" + major + "%'";
+                    }
+                }
+                break;
+                case "TUI":
+                    sql += " AND STATUS > '01' AND TUIJIAN = '" + uid + "'";
+                    break;
+                case "GUAN":
+                    //用户管理的项目列表
+                    if (!"".equals(keyword)) {
+                        sql += " AND A.PROJECT_NUM LIKE '%" + keyword + "%'";
+                    }
+                    break;
+                case "FINISH":
+                    sql += " AND A.PROJECT_NUM IN (SELECT DISTINCT PROJECT_NUM FROM SMART_PROJECT_USER WHERE STATUS='06'  AND USER_ID='" + uid + "' )";
+                    break;
+                case "SEARCH": {
+                    switch (keyword) {
+                        case "招标中的项目":
+                            sql += " AND A.STATUS = '00'";
+                            break;
+                        case "1000元-3000元项目":
+                            sql += " AND A.PROJECT_AMT BETWEEN '1000'  AND '3000' ";
+                            break;
+                        case "土建专业项目":
+                            sql += " AND A.PROFESSION LIKE '%01%'";
+                            break;
+                        default: {
+                            switch (uid) {
+                                case "00": //全部
+                                    sql += " AND (A.PROFESSION_NAME LIKE '%" + keyword + "%' OR A.MREGIE_ID LIKE '%" + keyword + "%' OR A.CREGIE_ID LIKE '%" + keyword + "%' OR A.QREGIE_ID LIKE '%" + keyword + "%' )";
                                     break;
-                                case  "01": //地区
-                                    sql+=" AND (A.MREGIE_ID LIKE '%$keyword%' OR A.CREGIE_ID LIKE '%$keyword%' OR A.QREGIE_ID LIKE '%$keyword%')";
+                                case "01": //地区
+                                    sql += " AND (A.MREGIE_ID LIKE '%" + keyword + "%' OR A.CREGIE_ID LIKE '%" + keyword + "' OR A.QREGIE_ID LIKE '%" + keyword + "')";
                                     break;
-                                case  "02": //价格
-                                    sql+=" AND A.PROJECT_AMT >= '$keyword'";
+                                case "02": //价格
+                                    sql += " AND A.PROJECT_AMT >= '" + keyword + "'";
                                     break;
-                                case  "03": //专业
-                                    sql+=" AND A.PROFESSION_NAME LIKE '%$keyword%'";
+                                case "03": //专业
+                                    sql += " AND A.PROFESSION_NAME LIKE '%" + keyword + "'";
                                     break;
-                                    default:break;
+                                default:
+                                    break;
                             }
                         }
                         break;
+                    }
                 }
-            }
-                break;
-            default:
-                break;
-        }
-        //增加首页排序功能
-        switch (sort){
-            case  "00":
-                sql+="  ORDER BY DATATIME DESC LIMIT $start,$length ";
-                break;
-            case  "01"://01：正在服务中
-                sql+="  AND A.STATUS='03' ORDER BY A.STATUS ASC,CAST(PROJECT_AMT AS DECIMAL) DESC, DATATIME DESC LIMIT $start,$length  ";
-                break;
-            case  "02"://02：项目已完工
-                sql+="  AND A.STATUS='04' ORDER BY A.STATUS ASC,CAST(PROJECT_AMT AS DECIMAL) ASC, DATATIME DESC LIMIT $start,$length";
-                break;
-            case  "03":
-                sql+="  ORDER BY A.STATUS ASC, DATATIME DESC LIMIT $start,$length  ";
                 break;
                 default:
-                 sql+="  ORDER BY DATATIME DESC LIMIT $start,$length";
-                 break;
+                    break;
+            }
+            //增加首页排序功能
+            switch (sort) {
+                case "00":
+                    if (status == 1) {
+                        sql += " AND A.STATUS='03' ORDER BY DATATIME DESC LIMIT " + start + "," + end + " ";
+                    } else if (status == 2) {
+                        sql += " AND A.STATUS='07' ORDER BY DATATIME DESC LIMIT " + start + "," + end + " ";
+                    } else if (status == 3) {
+                        sql += " AND A.STATUS='04' ORDER BY DATATIME DESC LIMIT " + start + "," + end + " ";
+                    } else {
+                        sql += "  ORDER BY DATATIME DESC LIMIT " + start + "," + end + " ";
+                    }
+                    break;
+                case "01"://01：正在服务中
+                    sql += "  AND A.STATUS='03' ORDER BY A.STATUS ASC,CAST(PROJECT_AMT AS DECIMAL) DESC, DATATIME DESC LIMIT " + start + "," + end + " ";
+                    break;
+                case "02"://02：项目已完工
+                    sql += "  AND A.STATUS='04' ORDER BY A.STATUS ASC,CAST(PROJECT_AMT AS DECIMAL) ASC, DATATIME DESC LIMIT " + start + "," + end + " ";
+                    break;
+                case "03":
+                    sql += "  ORDER BY A.STATUS ASC, DATATIME DESC LIMIT " + start + "," + end + " ";
+                    break;
+                default:
+                    sql += "  ORDER BY DATATIME DESC LIMIT " + start + "," + end + " ";
+                    break;
+            }
+            System.out.println(sql);
+            List<SMART_PROJECT> projectList = iProject.findProject(sql);
+            rJsonObject.put("code", "200");
+            rJsonObject.put("list", projectList);
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
         }
-            return  rJsonObject.toJSONString();
+        return rJsonObject.toJSONString();
 
     }
-    public  void SubscribeProject(String amt,String city,String profession){
-        List<SMART_SUBSCRIBE> list=iProject.SubscribeProject("STATUS='02' AND BEGIN_AMT >= '"+amt+"' AND END_AMT < '"+amt+"' AND MREGIE_ID='"+city+"'" +
-             "   AND PROFESSION LIKE '%"+profession+"%' ");
+
+    public void SubscribeProject(String amt, String city, String profession) {
+        List<SMART_SUBSCRIBE> list = iProject.SubscribeProject("STATUS='02' AND BEGIN_AMT >= '" + amt + "' AND END_AMT < '" + amt + "' AND MREGIE_ID='" + city + "'" +
+                "   AND PROFESSION LIKE '%" + profession + "%' ");
         //循环发送短信
         String txt = "【融汇精工】：尊敬的客户，平台有您订阅的项目发布啦，请及时登录小程序查看。感谢您的信任，祝您生活愉快。";
-       for(SMART_SUBSCRIBE subscribe:list){
-         String  uid=subscribe.getUserId();
-           SendMessage(uid,txt);
-       }
+        for (SMART_SUBSCRIBE subscribe : list) {
+            String uid = subscribe.getUserId();
+            SendMessage(uid, txt);
+        }
     }
-    public String  GetRuleStr(String ruleid){
-        String returnvalue="";
-        SMART_RULE smartRule=icommon.findSmartrule("rule_id",ruleid);
-        if(smartRule!=null){
-            String id=smartRule.getRuleValue();
-            if(id.equals("")||id==null){
-                id="1000000";
+
+    /*
+     * 获取最近一个项目
+     */
+    @RequestMapping(value = "/GetCurProject", method = RequestMethod.POST)
+    public String GetCurProject(@RequestBody String params) throws IOException {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(params);
+            jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+            SMART_PROJECT project = iProject.findCurProject();
+            if(project!=null){
+                rJsonObject.put("code", "200");
+                rJsonObject.put("subCode","0");
+                rJsonObject.put("project", project);
+            }else{
+                rJsonObject.put("code","200");
+                rJsonObject.put("subCode","10010");
             }
-            int num=Integer.parseInt(id)+1;
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "500");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    public String GetRuleStr(String ruleid) {
+        String returnvalue = "";
+        SMART_RULE smartRule = icommon.findSmartrule("rule_id", ruleid);
+        if (smartRule != null) {
+            String id = smartRule.getRuleValue();
+            if (id.equals("") || id == null) {
+                id = "1000000";
+            }
+            int num = Integer.parseInt(id) + 1;
             smartRule.setRuleValue(String.valueOf(num));
             //更新最大编号
             icommon.upSmartrule(smartRule);
-            returnvalue=smartRule.getPrefix()+String.valueOf(num);
+            returnvalue = smartRule.getPrefix() + String.valueOf(num);
         }
-        return  returnvalue;
+        return returnvalue;
     }
-    public void  SendMessage(String uid,String txt){
+
+    public void SendMessage(String uid, String txt) {
 
         String smsapi = "http://api.smsbao.com/";
         String user = "szgf"; //短信平台帐号
@@ -781,8 +1088,8 @@ public class ProjectController {
         String phone = uid;//要发送短信的手机号码
         String sendurl = "";
         try {
-            sendurl = smsapi+"sms?u="+user+"&p="+pass+"&m="+phone+"&c="+ URLEncoder.encode(txt,"utf-8");
-            String result=HttpClient.doPost(sendurl,"") ;
+            sendurl = smsapi + "sms?u=" + user + "&p=" + pass + "&m=" + phone + "&c=" + URLEncoder.encode(txt, "utf-8");
+            String result = HttpClient.doPost(sendurl, "");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

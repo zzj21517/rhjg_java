@@ -1,76 +1,68 @@
 package com.lxh.rhjg.entity;
 
 public class UserProjectDetail1 {
-    private  String USER_ID;
-    private  String GUID;
-    private  String NICK_NAME;
-    private  String LEVEL;
-    private  String PROJECT_AMT;
-    private  String MREGIE_ID;
-    private  String CREGIE_ID;
-    private  String DATATIME;
-    private  String IMG_PATH;
-    private  String USER_LEVEL;
-    private  String USER_TYPE;
-    private  String USER_TYPR_FLAG;
-    private  String FINISH_NUM;
-    private  String MONEY;
-    private  String LEVEL_TYPE;
+    private String nickName;
+    private String rowguid;
+    private String avatarUrl;
+    private int userFlag;
+    private int engineerType;
+    private int finishNum;
+    private String STATUS;
 
-    public String getUSER_ID() {
-        return USER_ID;
+    public String getSTATUS() {
+        return STATUS;
     }
 
-    public void setUSER_ID(String USER_ID) {
-        this.USER_ID = USER_ID;
+    public void setSTATUS(String STATUS) {
+        this.STATUS = STATUS;
     }
 
-    public String getGUID() {
-        return GUID;
+    public String getNickName() {
+        return nickName;
     }
 
-    public void setGUID(String GUID) {
-        this.GUID = GUID;
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
-    public String getNICK_NAME() {
-        return NICK_NAME;
+    public String getRowguid() {
+        return rowguid;
     }
 
-    public void setNICK_NAME(String NICK_NAME) {
-        this.NICK_NAME = NICK_NAME;
+    public void setRowguid(String rowguid) {
+        this.rowguid = rowguid;
     }
 
-    public String getLEVEL() {
-        return LEVEL;
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
-    public void setLEVEL(String LEVEL) {
-        this.LEVEL = LEVEL;
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
-    public String getPROJECT_AMT() {
-        return PROJECT_AMT;
+    public int getUserFlag() {
+        return userFlag;
     }
 
-    public void setPROJECT_AMT(String PROJECT_AMT) {
-        this.PROJECT_AMT = PROJECT_AMT;
+    public void setUserFlag(int userFlag) {
+        this.userFlag = userFlag;
     }
 
-    public String getMREGIE_ID() {
-        return MREGIE_ID;
+    public int getEngineerType() {
+        return engineerType;
     }
 
-    public void setMREGIE_ID(String MREGIE_ID) {
-        this.MREGIE_ID = MREGIE_ID;
+    public void setEngineerType(int engineerType) {
+        this.engineerType = engineerType;
     }
 
-    public String getCREGIE_ID() {
-        return CREGIE_ID;
+    public int getFinishNum() {
+        return finishNum;
     }
 
-    public void setCREGIE_ID(String CREGIE_ID) {
-        this.CREGIE_ID = CREGIE_ID;
+    public void setFinishNum(int finishNum) {
+        this.finishNum = finishNum;
     }
 
     public String getDATATIME() {
@@ -81,59 +73,32 @@ public class UserProjectDetail1 {
         this.DATATIME = DATATIME;
     }
 
-    public String getIMG_PATH() {
-        return IMG_PATH;
+    public String getPROJECT_AMT() {
+        return PROJECT_AMT;
     }
 
-    public void setIMG_PATH(String IMG_PATH) {
-        this.IMG_PATH = IMG_PATH;
+    public void setPROJECT_AMT(String PROJECT_AMT) {
+        this.PROJECT_AMT = PROJECT_AMT;
     }
 
-    public String getUSER_LEVEL() {
-        return USER_LEVEL;
+    public Double getDeposit() {
+        return deposit;
     }
 
-    public void setUSER_LEVEL(String USER_LEVEL) {
-        this.USER_LEVEL = USER_LEVEL;
+    public int getLevel() {
+        return level;
     }
 
-    public String getUSER_TYPE() {
-        return USER_TYPE;
+    public void setLevel(int level) {
+        this.level = level;
     }
 
-    public void setUSER_TYPE(String USER_TYPE) {
-        this.USER_TYPE = USER_TYPE;
+    public void setDeposit(Double deposit) {
+        this.deposit = deposit;
     }
 
-    public String getUSER_TYPR_FLAG() {
-        return USER_TYPR_FLAG;
-    }
-
-    public void setUSER_TYPR_FLAG(String USER_TYPR_FLAG) {
-        this.USER_TYPR_FLAG = USER_TYPR_FLAG;
-    }
-
-    public String getFINISH_NUM() {
-        return FINISH_NUM;
-    }
-
-    public void setFINISH_NUM(String FINISH_NUM) {
-        this.FINISH_NUM = FINISH_NUM;
-    }
-
-    public String getMONEY() {
-        return MONEY;
-    }
-
-    public void setMONEY(String MONEY) {
-        this.MONEY = MONEY;
-    }
-
-    public String getLEVEL_TYPE() {
-        return LEVEL_TYPE;
-    }
-
-    public void setLEVEL_TYPE(String LEVEL_TYPE) {
-        this.LEVEL_TYPE = LEVEL_TYPE;
-    }
+    private  String DATATIME;
+    private String PROJECT_AMT;
+    private Double deposit;
+    private int level;
 }

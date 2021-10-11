@@ -1,5 +1,6 @@
 package com.lxh.rhjg.active.impl;
 import com.alibaba.fastjson.JSONObject;
+import com.lxh.newrhjg.entity.FrameMember;
 import com.lxh.rhjg.active.api.ILuck;
 import com.lxh.rhjg.active.api.SMART_LUCKY;
 import com.lxh.rhjg.entity.SMART_TRADE;
@@ -74,8 +75,8 @@ public class LuckImpl implements ILuck {
     public void insettrade(SMART_TRADE smartTrade){
         Connection conn = JdbcUtils.getConn();
         //SQL语句
-        String sql = "INSERT INTO SMART_TRADE(GUID,TRADE_NUM,TRADE_AMT,CONTENT,STATUS,USER_ID,ITEM_TYPE,DATATIME,PROJECT_NUM)" +
-                " VALUES (?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO SMART_TRADE(GUID,TRADE_NUM,TRADE_AMT,CONTENT,STATUS,USER_ID,ITEM_TYPE,DATATIME,PROJECT_NUM,PAY_STATUS)" +
+                " VALUES (?,?,?,?,?,?,?,?,?,?)";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             preparedStatement.setString(1,smartTrade.getGUID());
@@ -89,6 +90,7 @@ public class LuckImpl implements ILuck {
             preparedStatement.setString(7,smartTrade.getITEM_TYPE());
             preparedStatement.setString(8,smartTrade.getDATATIME());
             preparedStatement.setString(9,smartTrade.getPROJECT_NUM());
+            preparedStatement.setInt(10,smartTrade.getPAY_STATUS());
             //执行语句，得到结果集
             preparedStatement.execute();
         } catch (SQLException e1) {

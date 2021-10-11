@@ -1,6 +1,7 @@
 package com.lxh.rhjg.active.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.lxh.newrhjg.entity.FrameMenu;
 import com.lxh.rhjg.active.api.IProject;
 import com.lxh.rhjg.active.api.SMART_PROJECT;
 import com.lxh.rhjg.active.api.SMART_SUBSCRIBE;
@@ -21,61 +22,21 @@ import java.util.List;
 @Service
 public class ProjectImpl implements IProject {
     @Override
-    public SMART_PROJECT findProject(String fieldname, String fieldvalue){
-        SMART_PROJECT smart_project=null;
+    public SMART_PROJECT findCurProject() {
+        SMART_PROJECT smartProject=null;
         Connection conn = JdbcUtils.getConn();
         //SQL语句
-        String sql = "select * From  SMART_PROJECT where "+fieldname+"=?";
+        String sql = "select * From  SMART_PROJECT ORDER BY DATATIME DESC LIMIT 0,1";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
-            preparedStatement.setString(1,fieldvalue);
             //执行语句，得到结果集
-         ResultSet resultSet=preparedStatement.executeQuery();
+            ResultSet resultSet=preparedStatement.executeQuery();
             while (resultSet.next()) {
-                smart_project=new SMART_PROJECT();
+                smartProject=new SMART_PROJECT();
                 //这里只查询的密码
-                smart_project.setBID_CLASSIFY(resultSet.getString("BID_CLASSIFY"));
-                smart_project.setCREGIE_ID(resultSet.getString("CREGIE_ID"));
-                smart_project.setCUST_ID(resultSet.getString("CUST_ID"));
-                smart_project.setDATATIME(resultSet.getString("DATATIME"));
-                smart_project.setDEAL_AMT(resultSet.getString("DEAL_AMT"));
-                smart_project.setFILE(resultSet.getString("FILE"));
-                smart_project.setFINISH_DATE(resultSet.getString("FINISH_DATE"));
-                smart_project.setIS_EAT(resultSet.getString("IS_EAT"));
-                smart_project.setIS_SEND(resultSet.getString("IS_SEND"));
-                smart_project.setIS_TRAVEL(resultSet.getString("IS_TRAVEL"));
-                smart_project.setLABEL_1(resultSet.getString("LABEL_1"));
-                smart_project.setLABEL_2(resultSet.getString("LABEL_2"));
-                smart_project.setLABEL_3(resultSet.getString("LABEL_3"));
-                smart_project.setLINK_MAN(resultSet.getString("LINK_MAN"));
-                smart_project.setLINK_TEL(resultSet.getString("LINK_TEL"));
-                smart_project.setLIST_NUM(resultSet.getString("LIST_NUM"));
-                smart_project.setMREGIE_ID(resultSet.getString("MREGIE_ID"));
-                smart_project.setPAY_AMT(resultSet.getString("PAY_AMT"));
-                smart_project.setPAY_STATUS(resultSet.getString("PAY_STATUS"));
-                smart_project.setPAY_STATUS10(resultSet.getString("PAY_STATUS10"));
-                smart_project.setPAY_STATUS20(resultSet.getString("PAY_STATUS20"));
-                smart_project.setPAY_TYPE(resultSet.getString("PAY_TYPE"));
-                smart_project.setPROFESSION_NAME(resultSet.getString("PROFESSION_NAME"));
-                smart_project.setYIJIA(resultSet.getString("YIJIA"));
-                smart_project.setQUALITY_NEED(resultSet.getString("QUALITY_NEED"));
-                smart_project.setPROJECT_NEED(resultSet.getString("PROJECT_NEED"));
-                smart_project.setPROJECT_FLAG(resultSet.getString("PROJECT_FLAG"));
-                smart_project.setPROFESSIONAL(resultSet.getString("PROFESSIONAL"));
-                smart_project.setTAIDU(resultSet.getString("TAIDU"));
-                smart_project.setSUDU(resultSet.getString("SUDU"));
-                smart_project.setZHILIANG(resultSet.getString("ZHILIANG"));
-                smart_project.setTUIJIAN(resultSet.getString("TUIJIAN"));
-                smart_project.setPROJECT_TYPE(resultSet.getString("PROJECT_TYPE"));
-                smart_project.setPROJECT_DESC(resultSet.getString("PROJECT_DESC"));
-                smart_project.setSCAN_NUM(resultSet.getString("SCAN_NUM"));
-                smart_project.setPROJECT_SIZE(resultSet.getString("PROJECT_SIZE"));
-                smart_project.setPROJECT_AMT(resultSet.getString("PROJECT_AMT"));
-                smart_project.setQREGIE_ID(resultSet.getString("QREGIE_ID"));
-                smart_project.setPROJECT_USE(resultSet.getString("PROJECT_USE"));
-                smart_project.setPROJECT_SIZE_TYPE(resultSet.getString("PROJECT_SIZE_TYPE"));
-                smart_project.setPROJECT_CLASSIFY(resultSet.getString("PROJECT_CLASSIFY"));
-                smart_project.setPROJECT_NUM(resultSet.getString("PROJECT_NUM"));
+                smartProject.setPROJECT_NUM(resultSet.getString("PROJECT_NUM"));
+                smartProject.setLINK_MAN(resultSet.getString("LINK_MAN"));
+                smartProject.setPROJECT_DESC(resultSet.getString("PROJECT_DESC"));
             }
         } catch (SQLException e1) {
             e1.printStackTrace();
@@ -86,7 +47,64 @@ public class ProjectImpl implements IProject {
                 e.printStackTrace();
             }
         }
-        return smart_project;
+        return smartProject;
+    }
+    @Override
+    public List<SMART_PROJECT> findProject(String condition){
+        List<SMART_PROJECT> list= new ArrayList<SMART_PROJECT>();
+        Connection conn = JdbcUtils.getConn();
+        //SQL语句
+        System.out.println(condition.startsWith("SELECT"));
+        String sql = condition.startsWith("SELECT")?condition: ("select * From  SMART_PROJECT where "+condition);
+        try {
+            PreparedStatement preparedStatement=conn.prepareStatement(sql);
+            //执行语句，得到结果集
+         ResultSet resultSet=preparedStatement.executeQuery();
+         System.out.println(resultSet.toString());
+            while (resultSet.next()) {
+                SMART_PROJECT smart_project=null;
+                smart_project=new SMART_PROJECT();
+                //这里只查询的密码
+                smart_project.setPROJECT_NUM(resultSet.getString("PROJECT_NUM"));
+                smart_project.setCUST_ID(resultSet.getString("CUST_ID"));
+                smart_project.setPROJECT_CLASSIFY(resultSet.getString("PROJECT_CLASSIFY"));
+                smart_project.setPROJECT_AMT(resultSet.getString("PROJECT_AMT"));
+                smart_project.setENGINEER_AMT(resultSet.getString("ENGINEER_AMT"));
+                smart_project.setMREGIE_ID(resultSet.getString("MREGIE_ID"));
+                smart_project.setCREGIE_ID(resultSet.getString("CREGIE_ID"));
+                smart_project.setFINISH_DATE(resultSet.getString("FINISH_DATE"));
+                smart_project.setDATATIME(resultSet.getString("DATATIME"));
+                smart_project.setPROJECT_DESC(resultSet.getString("PROJECT_DESC"));
+                smart_project.setSCAN_NUM(resultSet.getString("SCAN_NUM"));
+                smart_project.setSTATUS(resultSet.getString("Status"));
+                smart_project.setPROJECT_TYPE(resultSet.getString("PROJECT_TYPE"));
+                smart_project.setPROFESSIONAL(resultSet.getString("PROFESSIONAL"));
+                smart_project.setTUIJIAN(resultSet.getString("TUIJIAN"));
+                smart_project.setLABEL_1(resultSet.getString("LABEL_1"));
+                smart_project.setLABEL_2(resultSet.getString("LABEL_2"));
+                smart_project.setLABEL_3(resultSet.getString("LABEL_3"));
+                if(condition.startsWith("SELECT")){
+                    smart_project.setSTATUS_VALUE(resultSet.getString("STATUS_VALUE"));
+                    smart_project.setJUDGE_BUTTON(resultSet.getString("JUDGE_BUTTON"));
+                }else{
+                    smart_project.setWinBiddingTime(resultSet.getString("winBiddingTime"));
+                    smart_project.setNextUploadProcessTime(resultSet.getString("nextUploadProcessTime"));
+                    smart_project.setPAY_AMT(resultSet.getString("PAY_AMT"));
+                    smart_project.setLINK_MAN(resultSet.getString("LINK_MAN"));
+                    smart_project.setLINK_TEL(resultSet.getString("LINK_TEL"));
+                }
+                list.add(smart_project);
+            }
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }finally {
+            try {
+                conn.close();//关闭连接
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
     }
     //插入项目
     @Override
@@ -96,8 +114,8 @@ public class ProjectImpl implements IProject {
         //SQL语句
         String sql = "INSERT INTO SMART_PROJECT(PROJECT_NUM, CUST_ID, PROJECT_CLASSIFY,PROJECT_USE, LINK_MAN, LINK_TEL, PROJECT_AMT, "+
         "MREGIE_ID, CREGIE_ID, QREGIE_ID, PROJECT_SIZE, FINISH_DATE, PROJECT_DESC, STATUS, DATATIME,TUIJIAN,PROFESSIONAL,"+
-        "PROFESSION_NAME,PROJECT_FLAG,PROJECT_NEED,IS_TRAVEL,IS_EAT,BID_CLASSIFY,QUALITY_NEED,YIJIA,PAY_TYPE,LIST_NUM,PROJECT_SIZE_TYPE,productguid)"+
-        " VALUES(?,?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?) ";
+        "PROFESSION_NAME,PROJECT_FLAG,PROJECT_NEED,IS_TRAVEL,IS_EAT,BID_CLASSIFY,QUALITY_NEED,YIJIA,PAY_TYPE,LIST_NUM,PROJECT_SIZE_TYPE,productguid,ENGINEER_AMT)"+
+        " VALUES(?,?,?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?, ?,?,?,?,?,?,?,?,?,?) ";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             preparedStatement.setString(1,smartProject.getPROJECT_NUM());
@@ -129,6 +147,7 @@ public class ProjectImpl implements IProject {
             preparedStatement.setString(27,smartProject.getLIST_NUM());
             preparedStatement.setString(28,smartProject.getPROJECT_SIZE_TYPE());
             preparedStatement.setString(29,smartProject.getProductguid());
+            preparedStatement.setString(30,smartProject.getENGINEER_AMT());
             //执行语句，得到结果集
             preparedStatement.execute();
             n=1;
@@ -230,7 +249,7 @@ public class ProjectImpl implements IProject {
     {
         Connection conn = JdbcUtils.getConn();
         //SQL语句
-        String sql = "update  SMART_PROJECT set LINK_MAN=?,LINK_TEL=?,PROJECT_AMT=?,PROJECT_DESC=?,productguid=? WHERE PROJECT_NUM=? AND STATUS IN('00' , '01')  ";
+        String sql = "update  SMART_PROJECT set LINK_MAN=?,LINK_TEL=?,PROJECT_AMT=?,PROJECT_DESC=?,productguid=?,PAY_AMT=?,ENGINEER_AMT=? WHERE PROJECT_NUM=?";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             preparedStatement.setString(1,smartProject.getLINK_MAN());
@@ -238,7 +257,9 @@ public class ProjectImpl implements IProject {
             preparedStatement.setString(3,smartProject.getPROJECT_AMT());
             preparedStatement.setString(4,smartProject.getPROJECT_DESC());
             preparedStatement.setString(5,smartProject.getProductguid());
-            preparedStatement.setString(6,smartProject.getPROJECT_NUM());
+            preparedStatement.setString(6,smartProject.getPAY_AMT());
+            preparedStatement.setString(7,smartProject.getENGINEER_AMT());
+            preparedStatement.setString(8,smartProject.getPROJECT_NUM());
             //执行语句，得到结果集
             preparedStatement.execute();
         } catch (SQLException e1) {
@@ -257,6 +278,8 @@ public class ProjectImpl implements IProject {
         Connection conn = JdbcUtils.getConn();
         //SQL语句
         String sql = "update  SMART_PROJECT set "+upsql+" WHERE "+Condition;
+        System.out.println(sql
+        );
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             //执行语句，得到结果集
@@ -424,36 +447,38 @@ public class ProjectImpl implements IProject {
         List<ProjectDetail1> list=new ArrayList<>();
         ProjectDetail1 projectDetail=null;
         //SQL语句
-        String sql = "SELECT A.PROJECT_NUM, A.LINK_MAN,A.LINK_TEL,A.PROJECT_AMT,A.PROJECT_SIZE,A.MREGIE_ID,A.CREGIE_ID,A.QREGIE_ID,A.FINISH_DATE,A.PROJECT_DESC, " +
+        String sql = "SELECT A.PROJECT_NUM,A.CUST_ID,A.isAppraise, A.LINK_MAN,A.LINK_TEL,A.PROJECT_AMT,A.ENGINEER_AMT,A.PROJECT_SIZE,A.MREGIE_ID,A.CREGIE_ID,A.QREGIE_ID,A.FINISH_DATE,A.PROJECT_DESC, " +
                 "B.DICT_VALUE LEIBIE,C.DICT_VALUE STATUS,A.STATUS STATUS_VALUE,D.DICT_VALUE PAY_STATUS,A.PROJECT_TYPE,PAY_STATUS PAY_STATUS_VALUE, " +
                 "IFNULL(A.LABEL_1,'') LABEL_1,IFNULL(A.LABEL_2,'') LABEL_2,IFNULL(A.LABEL_3,'') LABEL_3, " +
                 "YIJIA,E.DICT_VALUE YONGTU,F.DICT_VALUE XUQIU,G.DICT_VALUE YIJIA_NAME,A.PROFESSION_NAME,A.PROJECT_USE, " +
                 "H.DICT_VALUE TRAVEL,I.DICT_VALUE EAT,J.DICT_VALUE PAY_TYPE_NAME,PAY_TYPE PAY_TYPE_VALUE,K.DICT_VALUE LIST_NUM, " +
-                "CASE WHEN (SELECT COUNT(*) FROM SMART_PROJECT_USER WHERE PROJECT_NUM=? AND USER_ID=?)= '0' THEN '0' ELSE '1' END IS_COLLECT " +
-                "FROM SMART_PROJECT ALEFT JOIN SMART_DICT B ON A.PROJECT_CLASSIFY=B.DICT_ID AND B.DICT_CODE='RHJG_PROJECT_TYPE_00'  " +
+                "CASE WHEN (SELECT COUNT(*) FROM SMART_PROJECT_USER WHERE PROJECT_NUM='"+fid+"' AND USER_ID='"+uid+"')= '0' THEN '0' ELSE '1' END IS_COLLECT " +
+                "FROM SMART_PROJECT A LEFT JOIN SMART_DICT B ON A.PROJECT_CLASSIFY=B.DICT_ID AND B.DICT_CODE='RHJG_PROJECT_TYPE_00'  " +
                 "LEFT JOIN SMART_DICT C ON A.STATUS=C.DICT_ID AND C.DICT_CODE='RHJG_STATUS' LEFT JOIN SMART_DICT D ON A.PAY_STATUS=D.DICT_ID AND D.DICT_CODE='RHJG_PAY_STATUS' " +
                 "LEFT JOIN SMART_DICT E ON A.PROJECT_USE=E.DICT_ID AND E.DICT_CODE='RHJG_PROJECT_USING' LEFT JOIN SMART_DICT F ON A.PROJECT_NEED=F.DICT_ID AND F.DICT_CODE='RHJG_PROJECT_NEED' " +
                 "LEFT JOIN SMART_DICT G ON A.YIJIA=G.DICT_ID AND G.DICT_CODE='RHJG_YIJIA' LEFT JOIN SMART_DICT H ON A.IS_TRAVEL=H.DICT_ID AND H.DICT_CODE='RHJG_TRAVEL_FEE' " +
                 "LEFT JOIN SMART_DICT I ON A.IS_EAT=I.DICT_ID AND I.DICT_CODE='RHJG_EATING_FEE' LEFT JOIN SMART_DICT J ON A.PAY_TYPE = J.DICT_ID AND J.DICT_CODE='RHJG_PAY_TYPE' " +
-                "LEFT JOIN SMART_DICT K ON A.PROJECT_SIZE_TYPE=K.DICT_ID AND K.DICT_CODE='RHJG_UNIT' WHERE A.PROJECT_NUM=? ";
+                "LEFT JOIN SMART_DICT K ON A.PROJECT_SIZE_TYPE=K.DICT_ID AND K.DICT_CODE='RHJG_UNIT' WHERE A.PROJECT_NUM='"+fid+"'";
+            System.out.println(sql);
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
-            preparedStatement.setString(1,fid);
-            preparedStatement.setString(2, uid);
-            preparedStatement.setString(3,fid);
             //执行语句，得到结果集
             ResultSet resultSet=preparedStatement.executeQuery();
+            System.out.println(resultSet);
             while (resultSet.next()) {
                 projectDetail=new ProjectDetail1();
                 projectDetail.setPROJECT_NUM(resultSet.getString("PROJECT_NUM").toString());
+                System.out.println(resultSet.getString("PROJECT_NUM").toString());
+                projectDetail.setCUST_ID(resultSet.getString("CUST_ID").toString());
                 projectDetail.setLINK_MAN(resultSet.getString("LINK_MAN").toString());
                 projectDetail.setLINK_TEL(resultSet.getString("LINK_TEL").toString());
-                projectDetail.setPROJECT_AMT(resultSet.getString("LINK_TEL").toString());
-                projectDetail.setPROJECT_SIZE(resultSet.getString("LINK_TEL").toString());
-                projectDetail.setMREGIE_ID(resultSet.getString("LINK_TEL").toString());
-                projectDetail.setCREGIE_ID(resultSet.getString("LINK_TEL").toString());
-                projectDetail.setQREGIE_ID(resultSet.getString("LINK_TEL").toString());
-                projectDetail.setFINISH_DATE(resultSet.getString("LINK_TEL").toString());
+                projectDetail.setPROJECT_AMT(resultSet.getString("PROJECT_AMT").toString());
+                projectDetail.setENGINEER_AMT(resultSet.getString("ENGINEER_AMT").toString());
+                projectDetail.setPROJECT_SIZE(resultSet.getString("PROJECT_SIZE").toString());
+                projectDetail.setMREGIE_ID(resultSet.getString("MREGIE_ID").toString());
+                projectDetail.setCREGIE_ID(resultSet.getString("CREGIE_ID").toString());
+                projectDetail.setQREGIE_ID(resultSet.getString("QREGIE_ID").toString());
+                projectDetail.setFINISH_DATE(resultSet.getString("FINISH_DATE").toString());
                 projectDetail.setPROJECT_DESC(resultSet.getString("PROJECT_DESC").toString());
                 projectDetail.setLEIBIE(resultSet.getString("LEIBIE").toString());
                 projectDetail.setSTATUS(resultSet.getString("STATUS").toString());
@@ -476,9 +501,12 @@ public class ProjectImpl implements IProject {
                 projectDetail.setPAY_TYPE_VALUE(resultSet.getString("PAY_TYPE_VALUE").toString());
                 projectDetail.setLIST_NUM(resultSet.getString("LIST_NUM").toString());
                 projectDetail.setIS_COLLECT(resultSet.getString("IS_COLLECT").toString());
+                projectDetail.setIsAppraise(resultSet.getInt("isAppraise"));
+                System.out.println(resultSet.getString("IS_COLLECT").toString());
                 list.add(projectDetail);
             }
         } catch (SQLException e1) {
+            System.out.println(e1);
             e1.printStackTrace();
         }finally {
             try {
@@ -529,34 +557,29 @@ public class ProjectImpl implements IProject {
         List<UserProjectDetail1> list=new ArrayList<>();
         UserProjectDetail1 projectDetail=null;
         //SQL语句
-        String sql = "SELECT B.USER_ID,B.GUID,B.NICK_NAME,B.LEVEL,A.PROJECT_AMT,B.MREGIE_ID,B.CREGIE_ID,SUBSTR(A.DATATIME,1,10) DATATIME," +
-                "B.IMG_PATH,C.DICT_VALUE USER_LEVEL,B.USER_TYPE,E.DICT_VALUE USER_TYPR_FLAG,D.FINISH_NUM," +
-                "B.MONEY,B.LEVEL_TYPE,F.DICT_VALUE LEVEL_TYPE FROM SMART_PROJECT_USER A  LEFT JOIN SMART_PEOPLE B ON A.USER_ID=B.USER_ID " +
-                "LEFT JOIN SMART_DICT C ON B.LEVEL=C.DICT_ID AND C.DICT_CODE='RHJG_LEVEL' LEFT JOIN SMART_COMPLETE_TASK D ON A.USER_ID=D.USER_ID " +
-                "LEFT JOIN SMART_DICT E ON B.USER_TYPE_FLAG=E.DICT_ID AND E.DICT_CODE='RHJG_USER_TYPE_IMAGE' LEFT JOIN SMART_DICT F ON B.LEVEL_TYPE=F.DICT_ID AND F.DICT_CODE='RHJG_USER_VIP' " +
-                "WHERE PROJECT_NUM=? AND A.STATUS='06'";
+        String sql = "SELECT  B.nickName,B.rowguid,B.avatarUrl,B.deposit,B.level,A.PROJECT_AMT,A.STATUS,SUBSTR(A.DATATIME,1,10) DATATIME," +
+                "B.userFlag,B.engineerType,B.finishNum" +
+                " FROM SMART_PROJECT_USER A  LEFT JOIN Frame_People B ON A.USER_ID=B.rowguid " +
+                " WHERE PROJECT_NUM='"+fid+"'";
+        System.out.println(sql);
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
-            preparedStatement.setString(1,fid);
             //执行语句，得到结果集
             ResultSet resultSet=preparedStatement.executeQuery();
             while (resultSet.next()) {
                 projectDetail=new UserProjectDetail1();
-                projectDetail.setUSER_ID(resultSet.getString("USER_ID").toString());
-                projectDetail.setGUID(resultSet.getString("GUID").toString());
-                projectDetail.setNICK_NAME(resultSet.getString("NICK_NAME").toString());
-                projectDetail.setLEVEL(resultSet.getString("LEVEL").toString());
+                projectDetail.setNickName(resultSet.getString("nickName").toString());
+                projectDetail.setRowguid(resultSet.getString("rowguid").toString());
+                projectDetail.setAvatarUrl(resultSet.getString("avatarUrl").toString());
+                projectDetail.setUserFlag(resultSet.getInt("userFlag"));
+                projectDetail.setEngineerType(resultSet.getInt("engineerType"));
+                projectDetail.setDeposit(resultSet.getDouble("deposit"));
                 projectDetail.setPROJECT_AMT(resultSet.getString("PROJECT_AMT").toString());
-                projectDetail.setMREGIE_ID(resultSet.getString("MREGIE_ID").toString());
-                projectDetail.setCREGIE_ID(resultSet.getString("CREGIE_ID").toString());
                 projectDetail.setDATATIME(resultSet.getString("DATATIME").toString());
-                projectDetail.setIMG_PATH(resultSet.getString("IMG_PATH").toString());
-                projectDetail.setUSER_LEVEL(resultSet.getString("USER_LEVEL").toString());
-                projectDetail.setUSER_TYPE(resultSet.getString("USER_TYPE").toString());
-                projectDetail.setUSER_TYPR_FLAG(resultSet.getString("USER_TYPR_FLAG").toString());
-                projectDetail.setFINISH_NUM(resultSet.getString("FINISH_NUM").toString());
-                projectDetail.setMONEY(resultSet.getString("MONEY").toString());
-                projectDetail.setLEVEL_TYPE(resultSet.getString("LEVEL_TYPE").toString());
+                projectDetail.setFinishNum(resultSet.getInt("finishNum"));
+                projectDetail.setLevel(resultSet.getInt("level"));
+                projectDetail.setSTATUS(resultSet.getString("STATUS"));
+                System.out.println("level_type");
                 list.add(projectDetail);
             }
         } catch (SQLException e1) {

@@ -1,10 +1,12 @@
 package com.lxh.newrhjg.entity;
 
+import javax.batch.api.Decider;
+
 public class FrameMember {
     private int id;
     private String name;
     private int level;
-    private int price;
+    private Double price;
     private int cut;
     private int quantity;
     private String privilege;
@@ -35,11 +37,11 @@ public class FrameMember {
         this.level = level;
     }
 
-    public int getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

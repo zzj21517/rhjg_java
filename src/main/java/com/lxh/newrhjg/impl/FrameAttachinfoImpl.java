@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -103,8 +105,8 @@ public class FrameAttachinfoImpl implements IframeAttachinfo {
         return flag;
     }
     @Override
-    public FrameAttchinfo find(Map<String, Object> map) {
-        FrameAttchinfo record=null;
+    public List<FrameAttchinfo> find(Map<String, Object> map) {
+        List<FrameAttchinfo> list=new ArrayList();
         Connection conn = JdbcUtils.getConn();
         //SQL语句
         String sql = "SELECT * FROM frame_attachinfo WHERE 1=1  ";
@@ -121,7 +123,7 @@ public class FrameAttachinfoImpl implements IframeAttachinfo {
             //执行语句，得到结果集
             ResultSet resultSet=preparedStatement.executeQuery();
             while (resultSet.next()) {
-                record=new FrameAttchinfo();
+                FrameAttchinfo record=new FrameAttchinfo();
                 record.setAttachguid(resultSet.getString("attachguid"));
                 record.setClientguid(resultSet.getString("clientguid"));
                 record.setFilepath(resultSet.getString("filepath"));
@@ -129,6 +131,7 @@ public class FrameAttachinfoImpl implements IframeAttachinfo {
                 record.setFilesize(resultSet.getString("filesize"));
                 record.setFiletype(resultSet.getString("filetype"));
                 record.setUploadtime(resultSet.getString("uploadtime"));
+                list.add(record);
             }
         } catch (SQLException e1) {
             e1.printStackTrace();
@@ -139,7 +142,7 @@ public class FrameAttachinfoImpl implements IframeAttachinfo {
                 e.printStackTrace();
             }
         }
-        return record;
+        return list;
     }
 
 }

@@ -7,6 +7,16 @@ public class UserProjectDetail {
     private  String CREGIE_ID;
     private  String IMG_PATH;
     private  String PROJECT_AMT;
+
+    public String getENGINEER_AMT() {
+        return ENGINEER_AMT;
+    }
+
+    public void setENGINEER_AMT(String ENGINEER_AMT) {
+        this.ENGINEER_AMT = ENGINEER_AMT;
+    }
+
+    private  String ENGINEER_AMT;
     public String getGUID() {
         return GUID;
     }

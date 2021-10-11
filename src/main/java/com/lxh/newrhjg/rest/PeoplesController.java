@@ -49,6 +49,7 @@ public class PeoplesController {
     IframeCompanyExtendinfo iframeCompanyExtendinfo;
     @Autowired
     IframeProject iframeProject;
+
     /*
      * 客户需求登记
      */
@@ -57,9 +58,9 @@ public class PeoplesController {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
-        int pid=Integer.parseInt(jsonObject.get("pid").toString());
-        int cid=Integer.parseInt(jsonObject.get("cid").toString());
-        String userName=jsonObject.get("userName").toString();
+        int pid = Integer.parseInt(jsonObject.get("pid").toString());
+        int cid = Integer.parseInt(jsonObject.get("cid").toString());
+        String userName = jsonObject.get("userName").toString();
         String phone = jsonObject.get("phone").toString();
         String verifyCode = jsonObject.get("verifyCode").toString();
         SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -70,20 +71,20 @@ public class PeoplesController {
                 rJsonObject.put("error", "验证码错误");
                 return rJsonObject.toJSONString();
             }
-            FrameApply frameApply=new FrameApply();
+            FrameApply frameApply = new FrameApply();
             frameApply.setUserName(userName);
             frameApply.setPhone(phone);
             frameApply.setPid(pid);
             frameApply.setCid(cid);
             frameApply.setCreateTime(dateTime);
-            int n=iframeProject.insertApply(frameApply);
-            if (n==0) {
+            int n = iframeProject.insertApply(frameApply);
+            if (n == 0) {
                 System.out.println("提交失败");
                 rJsonObject.put("code", "400");
-                rJsonObject.put("error","提交失败");
+                rJsonObject.put("error", "提交失败");
             } else {
                 rJsonObject.put("code", "200");
-                rJsonObject.put("msg","提交成功");
+                rJsonObject.put("msg", "提交成功");
                 rJsonObject.put("result", frameApply);//存在则返回用户信息
             }
         } catch (Exception e) {
@@ -92,6 +93,7 @@ public class PeoplesController {
         }
         return rJsonObject.toJSONString();
     }
+
 
     /*
      * 更新用户信息
@@ -102,19 +104,19 @@ public class PeoplesController {
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
         try {
-            String userguid = jsonObject.get("userguid")!=null?jsonObject.get("userguid").toString():"";
+            String userguid = jsonObject.get("userguid") != null ? jsonObject.get("userguid").toString() : "";
             //新加字段
-            String nickName = jsonObject.get("nickName")!=null?jsonObject.get("nickName").toString():"";
-            String avatarUrl = jsonObject.get("avatarUrl")!=null?jsonObject.get("avatarUrl").toString():"";
-            String province = jsonObject.get("province")!=null?jsonObject.get("province").toString():"";
-            String country = jsonObject.get("country")!=null?jsonObject.get("country").toString():"";
-            String city = jsonObject.get("city")!=null?jsonObject.get("city").toString():"";
-            String gender = jsonObject.get("gender")!=null?jsonObject.get("gender").toString():"";
+            String nickName = jsonObject.get("nickName") != null ? jsonObject.get("nickName").toString() : "";
+            String avatarUrl = jsonObject.get("avatarUrl") != null ? jsonObject.get("avatarUrl").toString() : "";
+            String province = jsonObject.get("province") != null ? jsonObject.get("province").toString() : "";
+            String country = jsonObject.get("country") != null ? jsonObject.get("country").toString() : "";
+            String city = jsonObject.get("city") != null ? jsonObject.get("city").toString() : "";
+            String gender = jsonObject.get("gender") != null ? jsonObject.get("gender").toString() : "";
             FramePeople record = new FramePeople();
             record = iframePeople.findPeople("rowguid", userguid);
             if (record == null) {
                 rJsonObject.put("code", "300");
-                rJsonObject.put("error","没查到该条数据");
+                rJsonObject.put("error", "没查到该条数据");
                 return rJsonObject.toJSONString();
             }
             record.setRowGuid(userguid);
@@ -128,7 +130,516 @@ public class PeoplesController {
             if (n == 0) {
                 rJsonObject.put("code", "400");
             } else {
-                rJsonObject.put("userInfo",record);
+                rJsonObject.put("userInfo", record);
+                rJsonObject.put("code", "200");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    /*
+     * 更新用户信息
+     */
+    @RequestMapping(value = "/switchUser", method = RequestMethod.POST)
+    public String switchUser(@RequestBody String params, @RequestHeader("openId") String openId) {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            if (openId == null) {
+                rJsonObject.put("code", "4000");
+                return rJsonObject.toJSONString();
+            }
+            FramePeople people = new FramePeople();
+            people = iframePeople.findPeople("openid", openId);
+            if (people == null) {
+                rJsonObject.put("code", "400");
+                rJsonObject.put("error", "接口异常");
+                return rJsonObject.toJSONString();
+            }
+            int userFlag = people.getUserFlag() == 0 ? 1 : 0;
+            people.setUserFlag(userFlag);
+            int engineerType = people.getEngineerType();
+            String userGuid = people.getRowGuid();
+            Boolean hasDetailInfo = true;
+            if (userFlag == 1) { //客户
+                FramePeopleCustom record = iframePeople.findCustom("userGuid", userGuid);
+                if (record == null) {
+                    hasDetailInfo = false;
+                }
+            } else if (userFlag == 0) {
+                if (engineerType == 1) {
+                    FramePeopleEngineerPerson record = iframePeople.findEngineerPerson("userGuid", userGuid);
+                    if (record == null) {
+                        hasDetailInfo = false;
+                    }
+                }
+            }
+            int n = iframePeople.update(people);
+            if (n == 0) {
+                rJsonObject.put("code", "400");
+            } else {
+                rJsonObject.put("hasDetailInfo", hasDetailInfo);
+                rJsonObject.put("userInfo", people);
+                rJsonObject.put("code", "200");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    /*
+     * 获取用户信息
+     */
+    @RequestMapping(value = "/getUserInfo", method = RequestMethod.POST)
+    public String getUserinfo(@RequestBody String params) {
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        try {
+            SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String uid = jsonObject.getString("uid");
+            FramePeople people = new FramePeople();
+            people = iframePeople.findPeople("rowguid", uid);
+            if (people == null) {
+                rJsonObject.put("code", "500");
+                return rJsonObject.toJSONString();
+            } else {
+                String expireTime = people.getExpireTime();
+                Date expireDate = sDateFormat.parse(expireTime);
+                Date curDate = sDateFormat.parse(sDateFormat.format(new Date()));
+                if (expireDate.before(curDate)) {
+                    people.setLevel(0);
+                    int n = iframePeople.update(people);
+                    if (n == 0) {
+                        rJsonObject.put("code", "500");
+                        return rJsonObject.toJSONString();
+                    }
+                }
+                rJsonObject.put("code", "200");
+                rJsonObject.put("userInfo", people);
+            }
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+
+    /*
+     * 获取用户详细信息
+     */
+    @RequestMapping(value = "/getUserDetailInfo", method = RequestMethod.POST)
+    public String getUserDetailInfo(@RequestBody String params, @RequestHeader("openId") String openId) {
+        JSONObject rJsonObject = new JSONObject();
+        try {
+            if (openId == null) {
+                rJsonObject.put("code", "4000");
+                return rJsonObject.toJSONString();
+            }
+            FramePeople people = new FramePeople();
+            people = iframePeople.findPeople("openid", openId);
+            if (people == null) {
+                rJsonObject.put("code", "400");
+                return rJsonObject.toJSONString();
+            }
+            int userFlag = people.getUserFlag();
+            int engineerType = people.getEngineerType();
+            String userGuid = people.getRowGuid();
+            if (userFlag == 1) { //客户
+                FramePeopleCustom record = iframePeople.findCustom("userGuid", userGuid);
+                if (record == null) {
+                    rJsonObject.put("code", "500");
+                } else {
+                    rJsonObject.put("code", 200);
+                    rJsonObject.put("data", record);
+                }
+            } else if (userFlag == 0) {
+                if (engineerType == 1) {
+                    FramePeopleEngineerPerson record = iframePeople.findEngineerPerson("userGuid", userGuid);
+                    if (record == null) {
+                        rJsonObject.put("code", "500");
+                    } else {
+                        rJsonObject.put("code", 200);
+                        rJsonObject.put("data", record);
+                    }
+                } else if (engineerType == 2) {
+                    FramePeopleEngineerTeam record = iframePeople.findEngineerTeam("userGuid", userGuid);
+                    if (record == null) {
+                        rJsonObject.put("code", "500");
+                    } else {
+                        rJsonObject.put("code", 200);
+                        rJsonObject.put("data", record);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+    /*
+     * 更新客户信息
+     */
+    @RequestMapping(value = "/updateCustomInfo", method = RequestMethod.POST)
+    public String updateCustomInfo(@RequestBody String params, @RequestHeader("openId") String openId) {
+        JSONObject rJsonObject = new JSONObject();
+        if (openId == null) {
+            rJsonObject.put("code", "4000");
+            return rJsonObject.toJSONString();
+        }
+        FramePeople people = new FramePeople();
+        people = iframePeople.findPeople("openid", openId);
+        if (people == null) {
+            rJsonObject.put("code", "400");
+            return rJsonObject.toJSONString();
+        }
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String userGuid = people.getRowGuid();
+        String customTypes = jsonObject.get("customTypes").toString();
+        int customFundAge = jsonObject.get("customFundAge") != null ? Integer.parseInt(jsonObject.get("customFundAge").toString()) : 0;
+        int customMemberNum = jsonObject.get("customMemberNum") != null ? Integer.parseInt(jsonObject.get("customMemberNum").toString()) : 0;
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            FramePeopleCustom record = iframePeople.findCustom("userGuid", userGuid);
+            int n = 0;
+            if (record == null) {
+                record = new FramePeopleCustom();
+                record.setRowGuid(UUID.randomUUID().toString());
+                record.setUserGuid(userGuid);
+                record.setCustomTypes(customTypes);
+                if (customFundAge != 0) {
+                    record.setCustomFundAge(customFundAge);
+                }
+                if (customMemberNum != 0) {
+                    record.setCustomMemberNum(customMemberNum);
+                }
+                record.setCreateTime(sDateFormat.format(new Date()));
+                record.setModifyTime(sDateFormat.format(new Date()));
+                n = iframePeople.insertCustom(record);
+            } else {
+                record.setCustomTypes(customTypes);
+                if (customFundAge != 0) {
+                    record.setCustomFundAge(customFundAge);
+                }
+                if (customMemberNum != 0) {
+                    record.setCustomMemberNum(customMemberNum);
+                }
+                record.setModifyTime(sDateFormat.format(new Date()));
+                n = iframePeople.updateCustom(record);
+            }
+            if (n == 0) {
+                rJsonObject.put("code", "400");
+            } else {
+                rJsonObject.put("code", "200");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+
+    /*
+     * 更新工程师个人信息
+     */
+    @RequestMapping(value = "/updateEngineerPersonInfo", method = RequestMethod.POST)
+    public String updateEngineerPersonInfo(@RequestBody String params, @RequestHeader("openId") String openId) {
+        JSONObject rJsonObject = new JSONObject();
+        if (openId == null) {
+            rJsonObject.put("code", "4000");
+            return rJsonObject.toJSONString();
+        }
+        FramePeople people = new FramePeople();
+        people = iframePeople.findPeople("openid", openId);
+        if (people == null) {
+            rJsonObject.put("code", "400");
+            return rJsonObject.toJSONString();
+        }
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String userGuid = people.getRowGuid();
+        String engineerName = jsonObject.get("engineerName").toString();
+        String majorTypes = jsonObject.get("majorTypes").toString();
+        String canDoArea = jsonObject.get("canDoArea").toString();
+        String partJob = jsonObject.get("partJob").toString();
+        String certImgs = jsonObject.get("certImgs").toString();
+        int canUploadElecBidding = jsonObject.getIntValue("canUploadElecBidding");
+        int canUseBim = jsonObject.getIntValue("canUseBim");
+        int canLocalCheck = jsonObject.getIntValue("canLocalCheck");
+        int canFieldCheck = jsonObject.getIntValue("canFieldCheck");
+        int canStamp = jsonObject.getIntValue("canStamp");
+        int technologyLevel = jsonObject.getIntValue("technologyLevel");
+        int workYears = jsonObject.getIntValue("workYears");
+        int spaceTime = jsonObject.getIntValue("spaceTime");
+        String companyType = jsonObject.getString("companyType");
+        String itemPricingSoftware = jsonObject.getString("itemPricingSoftware");
+        String calcuVolumeSoftware = jsonObject.getString("calcuVolumeSoftware");
+        String projectTypes = jsonObject.getString("projectTypes");
+        String serviceTypes = jsonObject.getString("serviceTypes");
+        String purchaseTypes = jsonObject.getString("purchaseTypes");
+        System.out.println("*****");
+        System.out.println(jsonObject.getString("certImgs"));
+        System.out.println(jsonObject.getString("zzj"));
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            FramePeopleEngineerPerson record = iframePeople.findEngineerPerson("userGuid", userGuid);
+            int n = 0;
+            if (record == null) {
+                record = new FramePeopleEngineerPerson();
+                record.setRowGuid(UUID.randomUUID().toString());
+                record.setUserGuid(userGuid);
+                record.setEngineerName(engineerName);
+                record.setMajorTypes(majorTypes);
+                record.setCanDoArea(canDoArea);
+                record.setPartJob(partJob);
+                record.setCertImgs(certImgs);
+                record.setCanUploadElecBidding(canUploadElecBidding);
+                record.setCanUseBim(canUseBim);
+                record.setCanLocalCheck(canLocalCheck);
+                record.setCanFieldCheck(canFieldCheck);
+                record.setCanStamp(canStamp);
+                record.setTechnologyLevel(technologyLevel);
+                record.setWorkYears(workYears);
+                record.setSpaceTime(spaceTime);
+                record.setCompanyType(companyType);
+                record.setItemPricingSoftware(itemPricingSoftware);
+                record.setCalcuVolumeSoftware(calcuVolumeSoftware);
+                record.setProjectTypes(projectTypes);
+                record.setServiceTypes(serviceTypes);
+                record.setPurchaseTypes(purchaseTypes);
+                record.setCreateTime(sDateFormat.format(new Date()));
+                record.setModifyTime(sDateFormat.format(new Date()));
+                n = iframePeople.insertEngineerPerson(record);
+            } else {
+                record.setEngineerName(engineerName);
+                record.setMajorTypes(majorTypes);
+                record.setCanDoArea(canDoArea);
+                record.setPartJob(partJob);
+                record.setCertImgs(certImgs);
+                record.setCanUploadElecBidding(canUploadElecBidding);
+                record.setCanUseBim(canUseBim);
+                record.setCanLocalCheck(canLocalCheck);
+                record.setCanFieldCheck(canFieldCheck);
+                record.setCanStamp(canStamp);
+                record.setTechnologyLevel(technologyLevel);
+                record.setWorkYears(workYears);
+                record.setSpaceTime(spaceTime);
+                record.setCompanyType(companyType);
+                record.setItemPricingSoftware(itemPricingSoftware);
+                record.setCalcuVolumeSoftware(calcuVolumeSoftware);
+                record.setProjectTypes(projectTypes);
+                record.setServiceTypes(serviceTypes);
+                record.setPurchaseTypes(purchaseTypes);
+                record.setModifyTime(sDateFormat.format(new Date()));
+                n = iframePeople.updateEngineerPerson(record);
+            }
+            if (n == 0) {
+                rJsonObject.put("code", "400");
+            } else {
+                rJsonObject.put("code", "200");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            rJsonObject.put("code", "400");
+        }
+        return rJsonObject.toJSONString();
+    }
+
+
+    /*
+     * 更新工程师个人信息
+     */
+    @RequestMapping(value = "/updateEngineerTeamInfo", method = RequestMethod.POST)
+    public String updateEngineerTeamInfo(@RequestBody String params, @RequestHeader("openId") String openId) {
+        JSONObject rJsonObject = new JSONObject();
+        if (openId == null) {
+            rJsonObject.put("code", "4000");
+            return rJsonObject.toJSONString();
+        }
+        FramePeople people = new FramePeople();
+        people = iframePeople.findPeople("openid", openId);
+        if (people == null) {
+            rJsonObject.put("code", "400");
+            return rJsonObject.toJSONString();
+        }
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String userGuid = people.getRowGuid();
+        String engineerName = jsonObject.get("engineerName").toString();
+        int memberNum = jsonObject.getIntValue("memberNum");
+        int tjNum = jsonObject.getIntValue("tjNum");
+        int azNum = jsonObject.getIntValue("azNum");
+        int ylNum = jsonObject.getIntValue("ylNum");
+        int jzxNum = jsonObject.getIntValue("jzxNum");
+        int szdlqlNum = jsonObject.getIntValue("szdlqlNum");
+        int dlNum = jsonObject.getIntValue("dlNum");
+        int dtNum = jsonObject.getIntValue("dtNum");
+        int tlNum = jsonObject.getIntValue("tlNum");
+        int txNum = jsonObject.getIntValue("txNum");
+        int tjjsbNum = jsonObject.getIntValue("tjjsbNum");
+        int azjsbNum = jsonObject.getIntValue("azjsbNum");
+        int yljsbNum = jsonObject.getIntValue("yljsbNum");
+        int jzxjsbNum = jsonObject.getIntValue("jzxjsbNum");
+        int szdlqljsbNum = jsonObject.getIntValue("szdlqljsbNum");
+        int dljsbNum = jsonObject.getIntValue("dljsbNum");
+        int dtjsbNum = jsonObject.getIntValue("dtjsbNum");
+        int tljsbNum = jsonObject.getIntValue("tljsbNum");
+        int txjsbNum = jsonObject.getIntValue("txjsbNum");
+        int wyfwNum = jsonObject.getIntValue("wxfwNUm");
+        int bafwNum = jsonObject.getIntValue("bafwNum");
+        int bjfwNum = jsonObject.getIntValue("bjfwNum");
+        int stcbfwNum = jsonObject.getIntValue("stcbfwNum");
+        int ljqyfwNum = jsonObject.getIntValue("ljqyfwNum");
+        int wlysfwNum = jsonObject.getIntValue("wlysfwNum");
+        int spzzfwNum = jsonObject.getIntValue("spzzfwNum");
+        int gccgNum = jsonObject.getIntValue("gccgNum");
+        int hwcgNum = jsonObject.getIntValue("hwcgNum");
+        int fwcgNum = jsonObject.getIntValue("fwcgNum");
+        int zfcgNum = jsonObject.getIntValue("zfcgNum");
+        int jzxcswjNum = jsonObject.getIntValue("jzxcswjNum");
+        int jzNum = jsonObject.getIntValue("jzNum");
+        int qzNum = jsonObject.getIntValue("qzNum");
+        int jzSpaceTime = jsonObject.getIntValue("jzSpaceTime");
+        int qzSpaceTime = jsonObject.getIntValue("qzSpaceTime");
+        int lessThan3WorkYears = jsonObject.getIntValue("lessThan3WorkYears");
+        int moreThan3WorkYears = jsonObject.getIntValue("moreThan3WorkYears");
+        int moreThan5WorkYears = jsonObject.getIntValue("moreThan5WorkYears");
+        String canDoArea = jsonObject.getString("canDoArea");
+        String businessCertImgs = jsonObject.getString("businessCertImgs");
+        String idCardCertImgs = jsonObject.getString("idCardCertImgs");
+        String engineerCertImgs = jsonObject.getString("engineerCertImgs");
+        int canUseBim = jsonObject.getIntValue("canUseBim");
+        int canUploadElecBidding = jsonObject.getIntValue("canUploadElecBidding");
+        int canLocalCheck = jsonObject.getIntValue("canLocalCheck");
+        int canFieldCheck = jsonObject.getIntValue("canFieldCheck");
+        int technologyLevel = jsonObject.getIntValue("technologyLevel");
+        String itemPricingSoftware = jsonObject.getString("itemPricingSoftware");
+        String calcuVolumeSoftware = jsonObject.getString("calcuVolumeSoftware");
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            FramePeopleEngineerTeam record = iframePeople.findEngineerTeam("userGuid", userGuid);
+            int n = 0;
+            if (record == null) {
+                record = new FramePeopleEngineerTeam();
+                record.setRowGuid(UUID.randomUUID().toString());
+                record.setUserGuid(userGuid);
+                record.setEngineerName(engineerName);
+                record.setMemberNum(memberNum);
+                record.setTjNum(tjNum);
+                record.setAzNum(azNum);
+                record.setYlNum(ylNum);
+                record.setJzxNum(jzxNum);
+                record.setSzdlqlNum(szdlqlNum);
+                record.setDlNum(dlNum);
+                record.setDtNum(dtNum);
+                record.setTlNum(tlNum);
+                record.setTxNum(txNum);
+                record.setTjjsbNum(tjjsbNum);
+                record.setAzjsbNum(azjsbNum);
+                record.setYljsbNum(yljsbNum);
+                record.setJzxjsbNum(jzxjsbNum);
+                record.setSzdlqljsbNum(szdlqljsbNum);
+                record.setDljsbNum(dljsbNum);
+                record.setDtjsbNum(dtjsbNum);
+                record.setTljsbNum(tljsbNum);
+                record.setTxjsbNum(txjsbNum);
+                record.setWyfwNum(wyfwNum);
+                record.setBafwNum(bafwNum);
+                record.setBjfwNum(bjfwNum);
+                record.setStcbfwNum(stcbfwNum);
+                record.setLjqyfwNum(ljqyfwNum);
+                record.setWlysfwNum(wlysfwNum);
+                record.setSpzzfwNum(spzzfwNum);
+                record.setGccgNum(gccgNum);
+                record.setHwcgNum(hwcgNum);
+                record.setFwcgNum(fwcgNum);
+                record.setZfcgNum(zfcgNum);
+                record.setJzxcswjNum(jzxcswjNum);
+                record.setJzNum(jzNum);
+                record.setQzNum(qzNum);
+                record.setJzSpaceTime(jzSpaceTime);
+                record.setQzSpaceTime(qzSpaceTime);
+                record.setLessThan3WorkYears(lessThan3WorkYears);
+                record.setMoreThan3WorkYears(moreThan3WorkYears);
+                record.setMoreThan5WorkYears(moreThan5WorkYears);
+                record.setCanDoArea(canDoArea);
+                record.setBusinessCertImgs(businessCertImgs);
+                record.setIdCardCertImgs(idCardCertImgs);
+                record.setEngineerCertImgs(engineerCertImgs);
+                record.setCanUseBim(canUseBim);
+                record.setCanUploadElecBidding(canUploadElecBidding);
+                record.setCanLocalCheck(canLocalCheck);
+                record.setCanFieldCheck(canFieldCheck);
+                record.setTechnologyLevel(technologyLevel);
+                record.setItemPricingSoftware(itemPricingSoftware);
+                record.setCalcuVolumeSoftware(calcuVolumeSoftware);
+                record.setCreateTime(sDateFormat.format(new Date()));
+                record.setModifyTime(sDateFormat.format(new Date()));
+                n = iframePeople.insertEngineerTeam(record);
+            } else {
+                record.setEngineerName(engineerName);
+                record.setMemberNum(memberNum);
+                record.setTjNum(tjNum);
+                record.setAzNum(azNum);
+                record.setYlNum(ylNum);
+                record.setJzxNum(jzxNum);
+                record.setSzdlqlNum(szdlqlNum);
+                record.setDlNum(dlNum);
+                record.setDtNum(dtNum);
+                record.setTlNum(tlNum);
+                record.setTxNum(txNum);
+                record.setTjjsbNum(tjjsbNum);
+                record.setAzjsbNum(azjsbNum);
+                record.setYljsbNum(yljsbNum);
+                record.setJzxjsbNum(jzxjsbNum);
+                record.setSzdlqljsbNum(szdlqljsbNum);
+                record.setDljsbNum(dljsbNum);
+                record.setDtjsbNum(dtjsbNum);
+                record.setTljsbNum(tljsbNum);
+                record.setTxjsbNum(txjsbNum);
+                record.setWyfwNum(wyfwNum);
+                record.setBafwNum(bafwNum);
+                record.setBjfwNum(bjfwNum);
+                record.setStcbfwNum(stcbfwNum);
+                record.setLjqyfwNum(ljqyfwNum);
+                record.setWlysfwNum(wlysfwNum);
+                record.setSpzzfwNum(spzzfwNum);
+                record.setGccgNum(gccgNum);
+                record.setHwcgNum(hwcgNum);
+                record.setFwcgNum(fwcgNum);
+                record.setZfcgNum(zfcgNum);
+                record.setJzxcswjNum(jzxcswjNum);
+                record.setJzNum(jzNum);
+                record.setQzNum(qzNum);
+                record.setJzSpaceTime(jzSpaceTime);
+                record.setQzSpaceTime(qzSpaceTime);
+                record.setLessThan3WorkYears(lessThan3WorkYears);
+                record.setMoreThan3WorkYears(moreThan3WorkYears);
+                record.setMoreThan5WorkYears(moreThan5WorkYears);
+                record.setCanDoArea(canDoArea);
+                record.setBusinessCertImgs(businessCertImgs);
+                record.setIdCardCertImgs(idCardCertImgs);
+                record.setEngineerCertImgs(engineerCertImgs);
+                record.setCanUseBim(canUseBim);
+                record.setCanUploadElecBidding(canUploadElecBidding);
+                record.setCanLocalCheck(canLocalCheck);
+                record.setCanFieldCheck(canFieldCheck);
+                record.setTechnologyLevel(technologyLevel);
+                record.setItemPricingSoftware(itemPricingSoftware);
+                record.setCalcuVolumeSoftware(calcuVolumeSoftware);
+                record.setModifyTime(sDateFormat.format(new Date()));
+                n = iframePeople.updateEngineerTeam(record);
+            }
+            if (n == 0) {
+                rJsonObject.put("code", "400");
+            } else {
                 rJsonObject.put("code", "200");
             }
         } catch (Exception e) {
@@ -142,7 +653,7 @@ public class PeoplesController {
      * 更新用户信息
      */
     @RequestMapping(value = "/updateUserInfo", method = RequestMethod.POST)
-    public String updateUserInfo(@RequestBody String params)  {
+    public String updateUserInfo(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
@@ -163,10 +674,10 @@ public class PeoplesController {
         //String openid = jsonObject.get("openid").toString();
         try {
             FramePeople record = new FramePeople();
-            record=iframePeople.findPeople("rowguid",userguid);
-            if(record ==null){
+            record = iframePeople.findPeople("rowguid", userguid);
+            if (record == null) {
                 rJsonObject.put("code", "300");
-                return  rJsonObject.toJSONString();
+                return rJsonObject.toJSONString();
             }
             record.setRowGuid(userguid);
             // record.setPhone(phone);
@@ -195,7 +706,7 @@ public class PeoplesController {
                     map.put("userguid", userguid);
                     peopleExtendinfo = iframePeopleExtend.find(map);
                     if (peopleExtendinfo == null) {//不存在，插入
-                        peopleExtendinfo=new FramePeopleExtendinfo();
+                        peopleExtendinfo = new FramePeopleExtendinfo();
                         peopleExtendinfo.setZjYear(zjYear);
                         peopleExtendinfo.setCustomType(customType);
                         peopleExtendinfo.setRowGuid(UUID.randomUUID().toString());
@@ -222,7 +733,7 @@ public class PeoplesController {
                     map.put("userguid", userguid);
                     companyExtendinfo = iframeCompanyExtendinfo.find(map);
                     if (companyExtendinfo == null) {//不存在，插入
-                        companyExtendinfo=new FrameCompanyExtendinfo();
+                        companyExtendinfo = new FrameCompanyExtendinfo();
                         companyExtendinfo.setIsYZ(isYZ);
                         companyExtendinfo.setMemberNum(Integer.parseInt(memberNum));
                         companyExtendinfo.setLicense(license);
@@ -308,8 +819,8 @@ public class PeoplesController {
     /*
      * 获取商铺信息
      */
-    @RequestMapping(value = "/getUserInfo", method = RequestMethod.POST)
-    public String getUserInfo(@RequestBody String params) {
+    @RequestMapping(value = "/getUserInfo1", method = RequestMethod.POST)
+    public String getUserInfo1(@RequestBody String params) {
         JSONObject rJsonObject = new JSONObject();
         JSONObject jsonObject = JSONObject.parseObject(params);
         jsonObject = JSONObject.parseObject(jsonObject.getString("param"));

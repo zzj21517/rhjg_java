@@ -49,7 +49,7 @@ public class ActiveController {
              luckBag.setSTATUS("00");
              luckBag.setPROJECT_NUM(pid);
             iLuck.insetLuckbag(luckBag);
-            SMART_PROJECT project=iProject.findProject("PROJECT_NUM",pid);
+            SMART_PROJECT project=iProject.findProject("PROJECT_NUM='"+pid+"'").get(0);
              if(project!=null){
                  SMART_LUCKY smartLucky=new SMART_LUCKY();
                  smartLucky.setGuid(UUID.randomUUID().toString());

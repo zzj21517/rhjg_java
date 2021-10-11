@@ -75,6 +75,28 @@ public class PeopleImpl implements IPeople {
             }
         }
     }
+    @Override
+    public void updateProjectUser(SMART_PROJECT_USER projectUser){
+        Connection conn = JdbcUtils.getConn();
+        //SQL语句
+        String sql = "UPDATE SMART_PROJECT_USER set STATUS=? where PROJECT_NUM=? AND USER_ID=?";
+        try {
+            PreparedStatement preparedStatement=conn.prepareStatement(sql);
+            preparedStatement.setString(1,projectUser.getSTATUS());
+            preparedStatement.setString(2,projectUser.getPROJECT_NUM());
+            preparedStatement.setString(3,projectUser.getUSER_ID());
+            //执行语句，得到结果集
+            preparedStatement.execute();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }finally {
+            try {
+                conn.close();//关闭连接
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     public void insertUser(SMART_PEOPLE smartPeople){
         Connection conn = JdbcUtils.getConn("oldurl","oldusername","oldpassword");
         //SQL语句

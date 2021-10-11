@@ -8,8 +8,44 @@ public class SMART_TRADE {
     private  String CONTENT;
     private  String STATUS;
     private  String DATATIME;
+    private  String PAY_TIME;
     private  String ITEM_TYPE;
     private  String USER_ID;
+    private int PAY_STATUS;
+    private String ExPIRE_TIME;
+    private String COUPONID;
+
+    public String getCOUPONID() {
+        return COUPONID;
+    }
+
+    public void setCOUPONID(String COUPONID) {
+        this.COUPONID = COUPONID;
+    }
+
+    public String getExPIRE_TIME() {
+        return ExPIRE_TIME;
+    }
+
+    public void setExPIRE_TIME(String exPIRE_TIME) {
+        ExPIRE_TIME = exPIRE_TIME;
+    }
+
+    public String getPAY_TIME() {
+        return PAY_TIME;
+    }
+
+    public void setPAY_TIME(String PAY_TIME) {
+        this.PAY_TIME = PAY_TIME;
+    }
+
+    public int getPAY_STATUS() {
+        return PAY_STATUS;
+    }
+
+    public void setPAY_STATUS(int PAY_STATUS) {
+        this.PAY_STATUS = PAY_STATUS;
+    }
 
     public String getGUID() {
         return GUID;

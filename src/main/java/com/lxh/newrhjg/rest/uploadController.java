@@ -138,8 +138,10 @@ public class uploadController {
             frameAttchinfo.setFiletype(type);
             frameAttchinfo.setFilesize(String.valueOf(new Long(multipartFile.getSize()).intValue()));
             int n = attachinfo.insert(frameAttchinfo);
-            if (n == 1)
+            if (n == 1){
+                rJsonObject.put("url",frameAttchinfo.getFilepath());
                 rJsonObject.put("code", "200");//
+            }
             else
                 rJsonObject.put("code", "400");//
         } catch (Exception ex) {
@@ -167,6 +169,27 @@ public class uploadController {
             rJsonObject.put("code", "200");//
         }catch (Exception e){
             rJsonObject.put("code", "400");//插入失败
+        }
+        return  rJsonObject.toJSONString();
+    }
+
+    /*
+     * 获取图片列表
+     */
+    @RequestMapping(value = "/getImgList", method = RequestMethod.POST)
+    public String getImgList(@RequestBody String params) {
+        JSONObject rJsonObject = new JSONObject();
+        JSONObject jsonObject = JSONObject.parseObject(params);
+        jsonObject = JSONObject.parseObject(jsonObject.getString("param"));
+        String clientGuid = jsonObject.get("clientGuid")!=null?jsonObject.get("clientGuid").toString():"";
+        Map<String,Object> map=new HashMap<>();
+        map.put("clientGuid",clientGuid);
+        try{
+            List<FrameAttchinfo> list = attachinfo.find(map);
+            rJsonObject.put("code","200");
+            rJsonObject.put("imgList",list);
+        }catch (Exception e){
+            rJsonObject.put("code", "500");
         }
         return  rJsonObject.toJSONString();
     }
@@ -223,8 +246,6 @@ public class uploadController {
     }
     /**
      *  [在图片底部生成二维码]
-     *  @param imagePath
-     *  @param qrCodeContent
      *  @throws Exception
      * @exception/throws [违例类型] [违例说明]
      * @see [类、类#方法、类#成员]

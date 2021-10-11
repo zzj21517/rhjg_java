@@ -50,11 +50,12 @@ public class SubscribeImpl implements ISubscribe {
             }
         }
     }
-    public void insertsignday(SMART_SIGNDAY smartSignday){
+    public int insertsignday(SMART_SIGNDAY smartSignday){
+        int flag=0;
         Connection conn = JdbcUtils.getConn();
         //SQL语句
-        String sql = "INSERT INTO SMART_SIGNDAY(GUID,USER_ID,LAST_SIGN_DATE,CONTINUE_DAY,DATATIME) " +
-                " VALUES(?,?,?,?,?) ";
+        String sql = "INSERT INTO SMART_SIGNDAY(GUID,USER_ID,LAST_SIGN_DATE,CONTINUE_DAY,DATATIME,INTEGRALTYPE,INTEGRALCHANGE) " +
+                " VALUES(?,?,?,?,?,?,?) ";
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             preparedStatement.setString(1,smartSignday.getGUID());
@@ -62,8 +63,11 @@ public class SubscribeImpl implements ISubscribe {
             preparedStatement.setString(3,smartSignday.getLAST_SIGN_DATE());
             preparedStatement.setString(4,smartSignday.getCONTINUE_DAY());
             preparedStatement.setString(5,smartSignday.getDATATIME());
+            preparedStatement.setInt(6,smartSignday.getINTEGRALTYPE());
+            preparedStatement.setInt(7,smartSignday.getINTEGRALCHANGE());
             //执行语句，得到结果集
-            preparedStatement.execute();
+           preparedStatement.execute();
+            flag=1;
         } catch (SQLException e1) {
             e1.printStackTrace();
         }finally {
@@ -73,6 +77,7 @@ public class SubscribeImpl implements ISubscribe {
                 e.printStackTrace();
             }
         }
+        return  flag;
     }
     public  List<HashMap<String,Object>> getLastSign(String condition){
         HashMap<String,Object> map=null;
@@ -80,7 +85,7 @@ public class SubscribeImpl implements ISubscribe {
         Connection conn = JdbcUtils.getConn();
         //SQL语句
         String sql = "SELECT DATEDIFF(CURDATE(),LAST_SIGN_DATE) LAST_SIGN_DATE,CONTINUE_SIGN,LAST_SIGN_DATE SIGN_DATE " +
-                " FROM SMART_USER_INFO WHERE 1=1 and "+condition;
+                " FROM smart_signday WHERE 1=1 and "+condition;
         try {
             PreparedStatement preparedStatement=conn.prepareStatement(sql);
             //执行语句，得到结果集

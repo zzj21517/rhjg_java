@@ -6,6 +6,25 @@ public class SMART_SIGNDAY {
     private  String LAST_SIGN_DATE;
     private  String CONTINUE_DAY;
     private  String DATATIME;
+    private int INTEGRALCHANGE;
+
+    public int getINTEGRALCHANGE() {
+        return INTEGRALCHANGE;
+    }
+
+    public void setINTEGRALCHANGE(int INTEGRALCHANGE) {
+        this.INTEGRALCHANGE = INTEGRALCHANGE;
+    }
+
+    public int getINTEGRALTYPE() {
+        return INTEGRALTYPE;
+    }
+
+    public void setINTEGRALTYPE(int INTEGRALTYPE) {
+        this.INTEGRALTYPE = INTEGRALTYPE;
+    }
+
+    private  int INTEGRALTYPE;
 
     public String getGUID() {
         return GUID;

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public  interface ITrade extends Serializable {
-    public void insertTrade(SMART_TRADE smartTrade);
+    public int insertTrade(SMART_TRADE smartTrade);
+    public  int updateTrade(SMART_TRADE smartTrade);
+    public List<SMART_TRADE> findTrade(String condition);
     public List<SMART_TRADE> find(Map<String, Object> map);
 }
